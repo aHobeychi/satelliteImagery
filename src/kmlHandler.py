@@ -17,8 +17,7 @@ class kmlHandler():
             return gdp.read_file(filePath)
 
     def createProjection(self, projectionType):
-        projection = {'init': 'espg:{}'.format(projectionType)}
-        return gdp.read_file(self.filePath).to_crs(projection)
+        return gdp.read_file(self.filePath).to_crs(projectionType)
 
     def setFilePath(self, filePath):
         self.filePath = filePath

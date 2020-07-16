@@ -39,8 +39,7 @@ class apiSession():
 
     def download(self, link, directory):
         self.api.download(
-            link, directory_path=directory. format(self.PROJECTNAME))
-        return self.handleDownloadedFile(filePath)
+            link, directory_path=directory)
 
     def handleDownloadedFile(self, exportPath):
 

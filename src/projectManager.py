@@ -7,19 +7,28 @@ from apiSession import apiSession
 class projectManager():
 
     def __init__(self, projectName):
+        baseFilePath = os.path.normpath(os.getcwd() + os.sep + os.pardir)
         self.PROJECTNAME = projectName
         self.SRCPATH = os.getcwd() + os.sep
-        self.DOWNIMGPATH = os.path.normpath(os.getcwd() + os.sep + os.pardir
-                                            + '\\downloadedImages\\') + os.sep
-        self.KEYPATH = os.path.normpath(os.getcwd() + os.sep + os.pardir
-                                        + '\\ressources\\') + os.sep + 'apiKey.txt'
-        self.KMLPATH = os.path.normpath(os.getcwd() + os.sep + os.pardir
-                                        + '\\kmlFiles\\{}\\'.format(projectName)) + os.sep + '{}.kml'.format(projectName)
+        self.DOWNIMGPATH = baseFilePath + '\\downloadedImages\\' + os.sep
+        self.KEYPATH = baseFilePath + '\\ressources\\' + os.sep + 'apiKey.txt'
+        self.KMLPATH = baseFilePath + '\\kmlFiles\\{}\\'.format(projectName)\
+            + os.sep + '{}.kml'.format(projectName)
+        self.IMGDWN = baseFilePath + '\\outputImages\\' + projectName + os.sep
         self.kmlHander = kmlHandler(self.KMLPATH)
         self.api = apiSession(projectName)
 
-    def __CreateDownloadFolder(self):
-        os.mkdir(self.DOWNIMGPATH + self.PROJECTNAME)
+    def __createDownloadFolder(self):
+        if os.path.exists(self.DOWNIMGPATH + self.PROJECTNAME):
+            return
+        else:
+            os.mkdir(self.DOWNIMGPATH + self.PROJECTNAME)
+
+    def __createImageOutputFolder(self):
+        if os.path.exists(self.IMGDWN):
+            return
+        else:
+            os.mkdir(self.IMGDWN)
 
     def __unZipDownload(self):
         downloadpath = self.DOWNIMGPATH + self.PROJECTNAME
@@ -73,7 +82,7 @@ class projectManager():
         return self.api.toGeoDf(catalog)
 
     def downloadData(self, link):
-        self.__CreateDownloadFolder()
+        self.__createDownloadFolder()
         self.api.download(link, self.DOWNIMGPATH + self.PROJECTNAME)
         return self.__handleZippedData()
 
@@ -90,4 +99,5 @@ class projectManager():
         granule = '{}\\{}\\GRANULE\\'.format(path, firstFolder)
         nextFolder = os.listdir(granule)[0]
         finalFolder = '{}{}\\IMG_DATA\\'.format(granule, nextFolder)
+        self.__createImageOutputFolder()
         return self.createImageReference(finalFolder)

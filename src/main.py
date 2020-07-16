@@ -1,6 +1,6 @@
 from apiSession import apiSession
 from projectManager import projectManager
-
+from rasterManipulation import createImages
 
 def getData(project):
 
@@ -21,17 +21,15 @@ def getData(project):
     toDownload = catalog.index.values[0]
     project.downloadData(toDownload)
 
-def processImages(imgInfo):
-    print('here')
+def imageCreation(info, project):
+    createImages(info,project)
+
 
 def main():
     projectName = 'rice lake'
     project = projectManager(projectName)
-    # project.handleZippedData()
-    # getData(project)
-    info = project.findImageFiles()
-    processImages(info)
-
+    info = (project.findImageFiles())
+    imageCreation(info,project)
 
 if __name__ == "__main__":
     main()
