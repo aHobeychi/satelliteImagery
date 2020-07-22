@@ -7,6 +7,7 @@ class kmlHandler():
     def __init__(self, filePath = False):
         fiona.supported_drivers['kml'] = 'rw'
         fiona.supported_drivers['KML'] = 'rw'
+        fiona.supported_drivers['LIBKML'] = 'rw'
         if filePath != False:
             self.filePath = filePath 
 
@@ -48,9 +49,9 @@ class kmlHandler():
     
         return listOfPoints
 
-        """returns dictionnary containing all usefull information of the 
-            given kml file
-        """
+    """returns dictionnary containing all usefull information of the 
+        given kml file
+    """
     def parseKml(self, filePath):
 
         information = {}
@@ -82,7 +83,7 @@ class kmlHandler():
             return footprint
 
         else: 
-            parsedKml = parseKml.parseKml(filePath)
+            parsedKml = self.parseKml(filePath)
             listOfCoordinates = geometryObject.\
                 removeThridDimension(parsedKml['coordinates'])
             footprint = geometryObject.createGeometry(listOfCoordinates)

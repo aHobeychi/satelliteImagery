@@ -9,20 +9,20 @@ class projectManager():
     def __init__(self, projectName):
         baseFilePath = os.path.normpath(os.getcwd() + os.sep + os.pardir)
         self.PROJECTNAME = projectName
-        self.SRCPATH = os.getcwd() + os.sep
-        self.DOWNIMGPATH = baseFilePath + '\\downloadedImages\\' + os.sep
-        self.KEYPATH = baseFilePath + '\\ressources\\' + os.sep + 'apiKey.txt'
-        self.KMLPATH = baseFilePath + '\\kmlFiles\\{}\\'.format(projectName)\
-            + os.sep + '{}.kml'.format(projectName)
-        self.IMGDWN = baseFilePath + '\\outputImages\\' + projectName + os.sep
+        self.SRCPATH = os.getcwd()
+        self.DOWNIMGPATH = os.path.join(baseFilePath, 'downloadedImages')
+        self.KEYPATH = os.path.join(baseFilePath, 'ressources', 'apiKey.txt')
+        self.KMLPATH = os.path.join(
+            baseFilePath, 'kmlFiles', projectName, '{}.kml'.format(projectName))
+        self.IMGDWN = os.path.join(baseFilePath, 'outputImages', projectName)
         self.kmlHander = kmlHandler(self.KMLPATH)
         self.api = apiSession(projectName)
 
     def __createDownloadFolder(self):
-        if os.path.exists(self.DOWNIMGPATH + self.PROJECTNAME):
+        if os.path.exists(os.path.join(self.DOWNIMGPATH, self.PROJECTNAME)):
             return
         else:
-            os.mkdir(self.DOWNIMGPATH + self.PROJECTNAME)
+            os.mkdir(os.path.join(self.DOWNIMGPATH, self.PROJECTNAME))
 
     def __createImageOutputFolder(self):
         if os.path.exists(self.IMGDWN):
@@ -31,38 +31,39 @@ class projectManager():
             os.mkdir(self.IMGDWN)
 
     def __unZipDownload(self):
-        downloadpath = self.DOWNIMGPATH + self.PROJECTNAME
+        downloadpath = os.path.join(self.DOWNIMGPATH, self.PROJECTNAME)
         filename = ''
         for file in os.listdir(downloadpath):
             if file.endswith('.zip'):
                 filename = file
 
-        with ZipFile('{}\\{}'.format(downloadpath, filename)) as zip_ref:
+        with ZipFile('{}{}{}'.format(downloadpath, os.sep, filename)) as zip_ref:
             zip_ref.extractall(downloadpath)
 
         end = filename.find('.zip')
 
-        os.remove('{}\\{}'.format(downloadpath, filename))
+        os.remove(os.path.join(downloadpath, filename))
+
         workingFolder = '{}.SAFE'.format(filename[:end])
-        granulePath = '{}\\{}\\GRANULE'.format(downloadpath, workingFolder)
+        granulePath = os.path.join(downloadpath, workingFolder, 'GRANULE')
 
         fileL2A = os.listdir(granulePath)[0]
-        imagePath = '{}\\{}\\IMG_DATA\\'.format(granulePath, fileL2A)
+        imagePath = os.path.join(granulePath, fileL2A, 'IMG_DATA')
         return imagePath
 
-        """create Image file location references
-        """
+    """create Image file location references
+    """
 
     def createImageReference(self, path):
 
         imageRef = []
-        differentResolutions = ['R10m\\', 'R20m\\', 'R60m\\']
+        differentResolutions = ['R10m', 'R20m', 'R60m']
 
         for res in differentResolutions:
             dict = {}
-            for file in os.listdir('{}{}'.format(path, res)):
+            for file in os.listdir(os.path.join(path, res)):
                 key = file.split('_')[2]
-                dict[key] = '{}{}{}'.format(path, res, file)
+                dict[key] = os.path.join(path, res, file)
 
             imageRef.append(dict)
 
@@ -90,14 +91,14 @@ class projectManager():
         img = self.__unZipDownload()
         return self.createImageReference(img)
 
-        """return dictionnary containing image files location
-        """
+    """return dictionnary containing image files location
+    """
 
     def findImageFiles(self):
-        path = self.DOWNIMGPATH + self.PROJECTNAME
+        path = os.path.join(self.DOWNIMGPATH, self.PROJECTNAME)
         firstFolder = os.listdir(path)[0]
-        granule = '{}\\{}\\GRANULE\\'.format(path, firstFolder)
+        granule = os.path.join(path, firstFolder, 'GRANULE')
         nextFolder = os.listdir(granule)[0]
-        finalFolder = '{}{}\\IMG_DATA\\'.format(granule, nextFolder)
+        finalFolder = os.path.join(granule, nextFolder, 'IMG_DATA')
         self.__createImageOutputFolder()
         return self.createImageReference(finalFolder)

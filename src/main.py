@@ -4,7 +4,6 @@ from rasterManipulation import createImages
 
 def getData(project):
 
-    projectMap = project.getGeoPanda()
     footprint = project.getFootPrint()
     catalog = project.getGeoDataFrame(footprint)
 

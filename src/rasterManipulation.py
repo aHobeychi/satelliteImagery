@@ -21,17 +21,18 @@ def cropImage(info, project):
     b02 = rasterio.open(info[0]['B02'])
     projType = b02.crs
     projection = project.createProjection(projType)
-    originalFilePath = project.IMGDWN + sep
-    outputPath = originalFilePath + sep + "cropped" + sep
-
+    originalFilePath = project.IMGDWN
+    print(originalFilePath)
+    outputPath = path.join(originalFilePath, 'cropped')
+    print(outputPath)
     if not path.exists(outputPath):
         mkdir(outputPath)
     files = listdir(originalFilePath)
     for f in files:
-        if path.isdir(originalFilePath + f) or '_Cropped' in f or '.aux' in f:
+        if path.isdir(path.join(originalFilePath,f)) or '_Cropped' in f or '.aux' in f:
             continue
         else:
-            filepath = originalFilePath + f
+            filepath = path.join(originalFilePath, f)
             with rasterio.open(filepath) as src:
                 out_image, out_transform = mask.mask(
                     src, projection.geometry, crop=True)
@@ -41,14 +42,14 @@ def cropImage(info, project):
                                  "width": out_image.shape[2],
                                  "transform": out_transform})
 
-        writePath = outputPath + f.replace('.tiff', '_Cropped.tiff')
+        writePath = path.join(outputPath, f.replace('.tiff', '_Cropped.tiff'))
         with rasterio.open(writePath, "w", **out_meta) as dest:
             dest.write(out_image)
 
 
 def createNDVI(info, project):
 
-    filepath = project.IMGDWN + project.PROJECTNAME + 'NDVI.tiff'
+    filepath = path.join(project.IMGDWN, '{}{}'.format(project.PROJECTNAME,'NDVI.tiff'))
     if path.exists(filepath):
         return
 
@@ -75,7 +76,7 @@ def createNDVI(info, project):
 
 def createSWI(info, project):
 
-    filepath = project.IMGDWN + project.PROJECTNAME + 'SWI.tiff'
+    filepath = path.join(project.IMGDWN, '{}{}'.format(project.PROJECTNAME, 'SWI.tiff'))
     if path.exists(filepath):
         return
 
@@ -95,7 +96,7 @@ def createSWI(info, project):
 
 def createRGB(info, project):
 
-    filepath = project.IMGDWN + project.PROJECTNAME + 'RGB.tiff'
+    filepath = path.join(project.IMGDWN, '{}{}'.format(project.PROJECTNAME, 'RGB.tiff'))
     if path.exists(filepath):
         return
 
@@ -114,7 +115,7 @@ def createRGB(info, project):
 
 def createGeo(info, project):
 
-    filepath = project.IMGDWN + project.PROJECTNAME + 'GEO.tiff'
+    filepath = path.join(project.IMGDWN, '{}{}'.format(project.PROJECTNAME,'GEO.tiff'))
     if path.exists(filepath):
         return
 
@@ -134,7 +135,7 @@ def createGeo(info, project):
 
 def createBathy(info, project):
 
-    filepath = project.IMGDWN + project.PROJECTNAME + 'BAT.tiff'
+    filepath = path.join(project.IMGDWN, '{}{}'.format(project.PROJECTNAME, 'BAT.tiff'))
     if path.exists(filepath):
         return
 
@@ -154,7 +155,7 @@ def createBathy(info, project):
 
 def createAgri(info, project):
 
-    filepath = project.IMGDWN + project.PROJECTNAME + 'AGRI.tiff'
+    filepath = path.join(project.IMGDWN, '{}{}'.format(project.PROJECTNAME, 'AGRI.tiff'))
     if path.exists(filepath):
         return
 
