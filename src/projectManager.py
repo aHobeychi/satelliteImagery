@@ -102,3 +102,20 @@ class projectManager():
         finalFolder = os.path.join(granule, nextFolder, 'IMG_DATA')
         self.__createImageOutputFolder()
         return self.createImageReference(finalFolder)
+
+    def getImageFilesPaths(self):
+        images = os.listdir(self.IMGDWN)
+        results = []
+        for image in images:
+            if '.tiff' in image:
+                results.append(os.path.join(self.IMGDWN, image))
+
+        return results
+
+    def getCroppedImageFilesPaths(self):
+        images = os.listdir(os.path.join(self.IMGDWN, 'cropped'))
+        results = []
+        for image in images:
+            if '.tiff' in image:
+                results.append(os.path.join(self.IMGDWN, 'cropped', image))
+        return results
