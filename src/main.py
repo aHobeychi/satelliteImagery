@@ -2,6 +2,7 @@ from apiSession import apiSession
 from projectManager import projectManager
 from rasterManipulation import createImages
 from visualize import visualizeSelection
+import maps
 
 
 def getData(project):
@@ -32,9 +33,12 @@ def main():
     project = projectManager(projectName)
     # info = (project.findImageFiles())
     # imageCreation(info,project)
-    paths = project.getImageFilesPaths()
-    visualizeSelection(project, 'rgb')
-
+    # paths = project.getImageFilesPaths()
+    # visualizeSelection(project, 'rgb')
+    # from visualize import getStreetMap
+    # getStreetMap(project)
+    maps.getOsmFootPrint(project)
+    maps.plotArea(project)
 
 if __name__ == "__main__":
     main()

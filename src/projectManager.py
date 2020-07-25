@@ -10,10 +10,10 @@ class projectManager():
         baseFilePath = os.path.normpath(os.getcwd() + os.sep + os.pardir)
         self.PROJECTNAME = projectName
         self.SRCPATH = os.getcwd()
-        self.DOWNIMGPATH = os.path.join(baseFilePath, 'downloadedImages')
+        self.DOWNIMGPATH = os.path.join(baseFilePath, 'downloadedData')
         self.KEYPATH = os.path.join(baseFilePath, 'ressources', 'apiKey.txt')
         self.KMLPATH = os.path.join(
-            baseFilePath, 'kmlFiles', projectName, '{}.kml'.format(projectName))
+                baseFilePath, 'kmlFiles', projectName, '{}.kml'.format(projectName))
         self.IMGDWN = os.path.join(baseFilePath, 'outputImages', projectName)
         self.kmlHander = kmlHandler(self.KMLPATH)
         self.api = apiSession(projectName)
