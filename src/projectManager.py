@@ -13,8 +13,9 @@ class projectManager():
         self.DOWNIMGPATH = os.path.join(baseFilePath, 'downloadedData')
         self.KEYPATH = os.path.join(baseFilePath, 'ressources', 'apiKey.txt')
         self.KMLPATH = os.path.join(
-                baseFilePath, 'kmlFiles', projectName, '{}.kml'.format(projectName))
+            baseFilePath, 'kmlFiles', projectName, '{}.kml'.format(projectName))
         self.IMGDWN = os.path.join(baseFilePath, 'outputImages', projectName)
+        self.CROPPEDIMG = os.path.join(self.IMGDWN, 'cropped')
         self.kmlHander = kmlHandler(self.KMLPATH)
         self.api = apiSession(projectName)
 
@@ -117,5 +118,24 @@ class projectManager():
         results = []
         for image in images:
             if '.tiff' in image:
-                results.append(os.path.join(self.IMGDWN, 'cropped', image))
+                results.append(os.path.join(self.IMGDWN, image))
+
         return results
+
+    def getImagePath(self, imageType, cropped=True):
+
+        imagePath = ''
+        if cropped == True:
+            path = self.CROPPEDIMG
+            listOfFiles = os.listdir(path)
+            for f in listOfFiles:
+                if imageType.lower() in f.lower():
+                    imagePath = os.path.join(path, f)
+        else:
+            path = self.IMGDWN
+            listOfFiles = os.listdir(path)
+            for f in listOfFiles:
+                if imageType.lower in f.lower():
+                    imagePath = os.path.join(path, f)
+
+        return imagePath

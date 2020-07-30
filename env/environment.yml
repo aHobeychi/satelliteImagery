@@ -20,6 +20,8 @@ cligj=0.5.0=py_0
 curl=7.71.1=he644dc0_3
 cycler=0.10.0=py37_0
 dbus=1.13.16=hb2f20db_0
+decorator=4.4.2=pypi_0
+descartes=1.1.0=pypi_0
 expat=2.2.9=he6710b0_2
 fiona=1.8.13=py37h0492a4a_1
 fontconfig=2.13.1=h86ecdb6_1001
@@ -42,6 +44,7 @@ icu=64.2=he1b5a44_1
 idna=2.10=pypi_0
 intel-openmp=2020.1=217
 isort=4.3.21=pypi_0
+joblib=0.16.0=pypi_0
 jpeg=9d=h516909a_0
 json-c=0.13.1=hbfbb72e_1002
 kealib=1.4.13=h33137a7_1
@@ -81,11 +84,13 @@ mkl_fft=1.1.0=py37h23d657b_0
 mkl_random=1.1.1=py37h0573a6f_0
 munch=2.5.0=py_0
 ncurses=6.2=he6710b0_1
+networkx=2.4=pypi_0
 numpy=1.18.5=py37ha1c710e_0
 numpy-base=1.18.5=py37hde5b4d6_0
 olefile=0.46=py_0
 openjpeg=2.3.1=h981e76c_3
 openssl=1.1.1g=h516909a_0
+osmnx=0.15.1=pypi_0
 pandas=1.0.5=py37h0573a6f_0
 pcre=8.44=he6710b0_0
 pillow=7.2.0=py37h718be6c_1
@@ -99,6 +104,7 @@ pycodestyle=2.6.0=pypi_0
 pylint=2.5.3=pypi_0
 pyparsing=2.4.7=py_0
 pyproj=2.6.1.post1=py37h34dd122_0
+pyrsgis=0.3.1=pypi_0
 python=3.7.7=hcff3b4d_5
 python-dateutil=2.8.1=py_0
 python_abi=3.7=1_cp37m
@@ -107,6 +113,8 @@ rasterio=1.1.5=py37h0492a4a_0
 readline=8.0=h7b6447c_0
 requests=2.24.0=pypi_0
 rtree=0.9.4=py37h8526d28_1
+scikit-learn=0.23.1=pypi_0
+scipy=1.5.2=pypi_0
 sentinel=0.1.2=pypi_0
 sentinelsat=0.14=pypi_0
 setuptools=49.2.0=py37_0
@@ -116,6 +124,7 @@ six=1.15.0=py_0
 snuggs=1.4.7=py_0
 sqlite=3.32.3=h62c20be_0
 tbb=2020.1=hc9558a2_0
+threadpoolctl=2.1.0=pypi_0
 tiledb=1.7.7=h8efa9f0_3
 tk=8.6.10=hbc83047_0
 toml=0.10.1=pypi_0

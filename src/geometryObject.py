@@ -1,12 +1,13 @@
 from shapely import geometry
 
+
 def removeThridDimension(points):
     reducedPoints = []
     for point in points:
-        y,x,z = point
-        newPoint = (x,y)
+        y, x, z = point
+        newPoint = (x, y)
         reducedPoints.append(newPoint)
-    
+
     return reducedPoints
 
 
@@ -16,5 +17,7 @@ def createGeometry(points):
 
     """Returns the coordinate of the top left Corner.
     """
+
+
 def getTopleftCorner(listOfPoints):
-    print('')    
+    print('')

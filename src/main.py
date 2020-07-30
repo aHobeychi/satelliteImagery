@@ -1,7 +1,7 @@
 from apiSession import apiSession
 from projectManager import projectManager
 from rasterManipulation import createImages
-from visualize import visualizeSelection
+import imaging
 import maps
 
 
@@ -31,14 +31,11 @@ def imageCreation(info, project):
 def main():
     projectName = 'rice lake'
     project = projectManager(projectName)
-    # info = (project.findImageFiles())
-    # imageCreation(info,project)
-    # paths = project.getImageFilesPaths()
-    # visualizeSelection(project, 'rgb')
-    # from visualize import getStreetMap
-    # getStreetMap(project)
-    maps.getOsmFootPrint(project)
-    maps.plotArea(project)
+    # createImages(project)
+    from maps import getOsmFootPrint
+    gdp = getOsmFootPrint(project)
+    imaging.showImage(project, 'rgb')
+
 
 if __name__ == "__main__":
     main()

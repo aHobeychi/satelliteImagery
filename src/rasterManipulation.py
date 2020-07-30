@@ -6,13 +6,15 @@ from rasterio import plot
 from rasterio import mask
 
 
-def createImages(info, project):
+def createImages(project):
+    info = project.findImageFiles()
     createAgri(info, project)
     createBathy(info, project)
     createGeo(info, project)
     createNDVI(info, project)
     createSWI(info, project)
     createRGB(info, project)
+    createNDBI(info, project)
     cropImage(info, project)
 
 
@@ -22,14 +24,12 @@ def cropImage(info, project):
     projType = b02.crs
     projection = project.createProjection(projType)
     originalFilePath = project.IMGDWN
-    print(originalFilePath)
     outputPath = path.join(originalFilePath, 'cropped')
-    print(outputPath)
     if not path.exists(outputPath):
         mkdir(outputPath)
     files = listdir(originalFilePath)
     for f in files:
-        if path.isdir(path.join(originalFilePath,f)) or '_Cropped' in f or '.aux' in f:
+        if path.isdir(path.join(originalFilePath, f)) or '_Cropped' in f or '.aux' in f:
             continue
         else:
             filepath = path.join(originalFilePath, f)
@@ -47,20 +47,46 @@ def cropImage(info, project):
             dest.write(out_image)
 
 
+def createNDBI(info, project):
+
+    filepath = path.join(project.IMGDWN, '{}{}'.format(
+        project.PROJECTNAME, 'NDBI.tiff'))
+    if path.exists(filepath):
+        return
+
+    r20 = info[1]
+    nirReader = rasterio.open(r20['B8A'], driver='JP2OpenJPEG')
+    swirReader = rasterio.open(r20['B11'], driver='JP2OpenJPEG')
+
+    nir = nirReader.read(1).astype('float64')
+    swir = swirReader.read(1).astype('float64')
+
+    ndbi = np.where((swir+nir) == 0, 0, (swir-nir)/(swir+nir))
+    ndbiImage = rasterio.open(filepath, 'w', driver='Gtiff',
+                              width=nirReader.width,
+                              height=nirReader.height,
+                              count=1, crs=nirReader.crs,
+                              transform=nirReader.transform,
+                              dtype='float64')
+    ndbiImage.write(ndbi, 1)
+    ndbiImage.close()
+
+
 def createNDVI(info, project):
 
-    filepath = path.join(project.IMGDWN, '{}{}'.format(project.PROJECTNAME,'NDVI.tiff'))
+    filepath = path.join(project.IMGDWN, '{}{}'.format(
+        project.PROJECTNAME, 'NDVI.tiff'))
     if path.exists(filepath):
         return
 
     r10 = info[0]
-    nirReader = rasterio.open(r10['B08'])
-    redReader = rasterio.open(r10['B04'])
+    nirReader = rasterio.open(r10['B08'], driver='JP2OpenJPEG')
+    redReader = rasterio.open(r10['B04'], driver='JP2OpenJPEG')
 
     nir = nirReader.read(1).astype('float64')
     red = redReader.read(1).astype('float64')
 
-    ndvi = np.where((nir+red) == 0, 0, (nir-red)/(nir+red))
+    ndvi = np.divide((nir-red), (nir+red))
     ndviImage = rasterio.open(filepath, 'w', driver='Gtiff',
                               width=nirReader.width,
                               height=nirReader.height,
@@ -69,41 +95,38 @@ def createNDVI(info, project):
                               dtype='float64')
     ndviImage.write(ndvi, 1)
     ndviImage.close()
-    # ndvi = rasterio.open(filepath)
-    # fig = plt.figure(figsize=(18,12))
-    # plot.show(ndvi)
 
 
 def createSWI(info, project):
 
-    filepath = path.join(project.IMGDWN, '{}{}'.format(project.PROJECTNAME, 'SWI.tiff'))
+    filepath = path.join(project.IMGDWN, '{}{}'.format(
+        project.PROJECTNAME, 'SWI.tiff'))
     if path.exists(filepath):
-        return
-
-    r10 = info[0]
-    r20 = info[1]
-    red = rasterio.open(r10['B04'])
-    b8a = rasterio.open(r20['B8A'])
-    b12 = rasterio.open(r20['B12'])
-    with rasterio.open(filepath, 'w', driver='Gtiff', width=red.width,
-                       height=red.height, count=3, crs=red.crs, transform=red.transform,
-                       dtype=red.dtypes[0]) as rgb:
-        rgb.write(red.read(1), 1)
-        rgb.write(b8a.read(1), 2)
-        rgb.write(b12.read(1), 3)
-        rgb.close()
+        r10 = info[0]
+        r20 = info[1]
+        red = rasterio.open(r10['B04'], driver='JP2OpenJPEG')
+        b8a = rasterio.open(r20['B8A'], driver='JP2OpenJPEG')
+        b12 = rasterio.open(r20['B12'], driver='JP2OpenJPEG')
+        with rasterio.open(filepath, 'w', driver='Gtiff', width=red.width, height=red.height, count=3,
+                           crs=red.crs, transform=red.transform,
+                           dtype=red.dtypes[0]) as rgb:
+            rgb.write(red.read(1), 1)
+            rgb.write(b8a.read(1), 2)
+            rgb.write(b12.read(1), 3)
+            rgb.close()
 
 
 def createRGB(info, project):
 
-    filepath = path.join(project.IMGDWN, '{}{}'.format(project.PROJECTNAME, 'RGB.tiff'))
+    filepath = path.join(project.IMGDWN, '{}{}'.format(
+        project.PROJECTNAME, 'RGB.tiff'))
     if path.exists(filepath):
         return
 
     r10 = info[0]
-    blue = rasterio.open(r10['B02'])
-    green = rasterio.open(r10['B03'])
-    red = rasterio.open(r10['B04'])
+    blue = rasterio.open(r10['B02'], driver='JP2OpenJPEG')
+    green = rasterio.open(r10['B03'], driver='JP2OpenJPEG')
+    red = rasterio.open(r10['B04'], driver='JP2OpenJPEG')
     with rasterio.open(filepath, 'w', driver='Gtiff', width=red.width,
                        height=red.height, count=3, crs=red.crs, transform=red.transform,
                        dtype=red.dtypes[0]) as rgb:
@@ -115,15 +138,16 @@ def createRGB(info, project):
 
 def createGeo(info, project):
 
-    filepath = path.join(project.IMGDWN, '{}{}'.format(project.PROJECTNAME,'GEO.tiff'))
+    filepath = path.join(project.IMGDWN, '{}{}'.format(
+        project.PROJECTNAME, 'GEO.tiff'))
     if path.exists(filepath):
         return
 
     r10 = info[0]
     r20 = info[1]
-    blue = rasterio.open(r10['B02'])
-    b11 = rasterio.open(r20['B11'])
-    b12 = rasterio.open(r20['B12'])
+    blue = rasterio.open(r10['B02'], driver='JP2OpenJPEG')
+    b11 = rasterio.open(r20['B11'], driver='JP2OpenJPEG')
+    b12 = rasterio.open(r20['B12'], driver='JP2OpenJPEG')
     with rasterio.open(filepath, 'w', driver='Gtiff', width=blue.width,
                        height=blue.height, count=3, crs=blue.crs, transform=blue.transform,
                        dtype=blue.dtypes[0]) as rgb:
@@ -135,15 +159,16 @@ def createGeo(info, project):
 
 def createBathy(info, project):
 
-    filepath = path.join(project.IMGDWN, '{}{}'.format(project.PROJECTNAME, 'BAT.tiff'))
+    filepath = path.join(project.IMGDWN, '{}{}'.format(
+        project.PROJECTNAME, 'BAT.tiff'))
     if path.exists(filepath):
         return
 
     r10 = info[0]
     r60 = info[2]
-    green = rasterio.open(r10['B03'])
-    red = rasterio.open(r10['B04'])
-    b01 = rasterio.open(r60['B01'])
+    green = rasterio.open(r10['B03'], driver='JP2OpenJPEG')
+    red = rasterio.open(r10['B04'], driver='JP2OpenJPEG')
+    b01 = rasterio.open(r60['B01'], driver='JP2OpenJPEG')
     with rasterio.open(filepath, 'w', driver='Gtiff', width=red.width,
                        height=red.height, count=3, crs=red.crs, transform=red.transform,
                        dtype=red.dtypes[0]) as rgb:
@@ -155,15 +180,16 @@ def createBathy(info, project):
 
 def createAgri(info, project):
 
-    filepath = path.join(project.IMGDWN, '{}{}'.format(project.PROJECTNAME, 'AGRI.tiff'))
+    filepath = path.join(project.IMGDWN, '{}{}'.format(
+        project.PROJECTNAME, 'AGRI.tiff'))
     if path.exists(filepath):
         return
 
     r10 = info[0]
     r20 = info[1]
-    blue = rasterio.open(r10['B02'])
-    b11 = rasterio.open(r20['B11'])
-    b08 = rasterio.open(r10['B08'])
+    blue = rasterio.open(r10['B02'], driver='JP2OpenJPEG')
+    b11 = rasterio.open(r20['B11'], driver='JP2OpenJPEG')
+    b08 = rasterio.open(r10['B08'], driver='JP2OpenJPEG')
     with rasterio.open(filepath, 'w', driver='Gtiff', width=blue.width,
                        height=blue.height, count=3, crs=blue.crs, transform=blue.transform,
                        dtype=blue.dtypes[0]) as rgb:

@@ -22,6 +22,11 @@ def getOsmFootPrint(project):
     return footprint
 
 
+def getBuildingData(project):
+    polygon = project.getFootPrint()
+    return ox.footprints_from_polygon(polygon, footprint_type='buildings')
+
+
 """Plot the are as a graph
 """
 
