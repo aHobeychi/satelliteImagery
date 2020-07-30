@@ -31,9 +31,6 @@ def imageCreation(info, project):
 def main():
     projectName = 'rice lake'
     project = projectManager(projectName)
-    # createImages(project)
-    from maps import getOsmFootPrint
-    gdp = getOsmFootPrint(project)
     imaging.showImage(project, 'rgb')
 
 

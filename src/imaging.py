@@ -63,5 +63,29 @@ def imageInformation(project, imageType, cropped=True):
 def showImage(project, imageType, cropped=True):
 
     filePath = project.getImagePath(imageType, cropped)
+
+    if imageType.lower() == 'rgb':
+        showRGB(filePath)
+        return
+
     img = rasterio.open(filePath)
     rasterio.plot.show(img, title=imageType, cmap='RdYlGn', vmin=-1, vmax=1)
+
+
+def showRGB(filePath):
+    src = rasterio.open(filePath)
+    from rasterio.plot import show
+    data = src.read()
+    stack1 = __normalizeArray(data[0])
+    stack2 = __normalizeArray(data[1])
+    stack3 = __normalizeArray(data[2])
+    normed = np.stack((stack1, stack2, stack3))
+    show(normed)
+
+
+def __normalizeArray(a):
+
+    min = np.min(a[np.nonzero(a)]).astype('float32')
+    max = np.max(a).astype('float32')
+    norm = 15*(a.astype('float32')-min)/(max + min)
+    return norm.clip(min=0)

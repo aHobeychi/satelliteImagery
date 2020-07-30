@@ -135,7 +135,7 @@ class projectManager():
             path = self.IMGDWN
             listOfFiles = os.listdir(path)
             for f in listOfFiles:
-                if imageType.lower in f.lower():
+                if imageType.lower() in f.lower():
                     imagePath = os.path.join(path, f)
 
         return imagePath
