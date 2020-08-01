@@ -1,11 +1,17 @@
 from os import listdir, path, mkdir, sep
 import numpy as np
 import rasterio
+from rasterio.plot import show
 import matplotlib.pyplot as plt
 from osgeo import gdal
 
-
 THREEBANDS = ['rgb', 'agri', 'bathy', 'swi', 'geo']
+
+brightness = {
+    'rgb': 8,
+    'agri': 3,
+    'geo': 3,
+}
 
 
 def createImages(project):
@@ -201,21 +207,6 @@ def createAgri(info, project):
         rgb.close()
 
 
-# TODO EXPORT IMAGES TO SIMPLER FORMATS
-def exportToCompressedImage(project, imageType, cropped=True, imageFormat='png'):
-
-    path = project.getImagePath(imageType, cropped)
-    with rasterio.open(path) as tiffFile:
-        profile = tiffFile.profile
-        profile['driver'] = imageFormat
-
-        newFileName = path.replace('tiff', imageFormat)
-        raster = tiffFile.read()
-
-        with rasterio.open(newFileName, 'w', **profile) as output:
-            output.write(raster)
-
-
 def imageInformation(project, imageType, cropped=True):
 
     imagePath = project.getImagePath(imageType, cropped)
@@ -258,30 +249,46 @@ def imageInformation(project, imageType, cropped=True):
     print('Band mean, stddev: {}, {}'.format(band_mean, band_stddev))
 
 
-def showImage(project, imageType, cropped=True):
+def showImage(project, imageType, cropped=True, save=False):
 
     filePath = project.getImagePath(imageType, cropped)
     if imageType.lower() in THREEBANDS:
-        showThreeBands(filePath)
+        __showThreeBands(filePath, imageType, save)
         return
 
     img = rasterio.open(filePath)
-    rasterio.plot.show(img, title=imageType, cmap='RdYlGn', vmin=-1, vmax=1)
+    ax = rasterio.plot.show(img, title=imageType,
+                            cmap='RdYlGn', vmin=-1, vmax=1)
+
+    if save == True:
+        output = filePath.replace('tiff', 'png')
+        if path.exists(output):
+            return
+        fig = ax.get_figure()
+        extent = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
+        fig.savefig(output, dpi=1200, bbox_inches=extent)
 
 
-def showThreeBands(filePath):
+def __showThreeBands(filePath, imageType, save):
     src = rasterio.open(filePath)
     data = src.read()
-    stack1 = __normalizeArray(data[0])
-    stack2 = __normalizeArray(data[1])
-    stack3 = __normalizeArray(data[2])
+    stack1 = __normalizeArray(data[0], imageType)
+    stack2 = __normalizeArray(data[1], imageType)
+    stack3 = __normalizeArray(data[2], imageType)
     normed = np.stack((stack1, stack2, stack3))
-    rasterio.plot.show(normed)
+    ax = rasterio.plot.show(normed)
+    if save == True:
+        output = filePath.replace('tiff', 'png')
+        if path.exists(output):
+            return
+        fig = ax.get_figure()
+        extent = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
+        fig.savefig(output, dpi=1200, bbox_inches=extent)
 
 
-def __normalizeArray(a):
+def __normalizeArray(a, imageType):
 
     min = np.min(a).astype('float32')
     max = np.max(a).astype('float32')
-    norm = 3*(a.astype('float32')-min)/(max + min)
+    norm = brightness[imageType]*(a.astype('float32')-min)/(max + min)
     return norm.clip(min=0)

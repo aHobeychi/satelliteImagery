@@ -1,7 +1,6 @@
 from apiSession import apiSession
 from projectManager import projectManager
-import rasterManipulation
-import imaging
+import rasterData
 import maps
 
 
@@ -31,8 +30,7 @@ def imageCreation(info, project):
 def main():
     projectName = 'rice lake'
     project = projectManager(projectName)
-    imaging.showImage(project, 'rgb')
-    rasterManipulation.exportToCompressedImage(project, 'rgb')
+    rasterData.showImage(project, 'geo', cropped=True, save=True)
 
 
 if __name__ == "__main__":
