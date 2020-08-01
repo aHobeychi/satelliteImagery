@@ -10,7 +10,7 @@ THREEBANDS = ['rgb', 'agri', 'bathy', 'swi', 'geo']
 brightness = {
     'rgb': 8,
     'agri': 3,
-    'geo': 3,
+    'geo': 2,
 }
 
 
@@ -249,41 +249,59 @@ def imageInformation(project, imageType, cropped=True):
     print('Band mean, stddev: {}, {}'.format(band_mean, band_stddev))
 
 
-def showImage(project, imageType, cropped=True, save=False):
+def convertPNG(project, imageType, cropped=True):
+
+    filePath = project.getImagePath(imageType, cropped)
+
+    if path.exists(filePath.replace('tiff', 'png')):
+        return
+
+    if imageType.lower() in THREEBANDS:
+        __convertThreeBands(filePath, imageType)
+        return
+
+    src = rasterio.open(filePath)
+    data = src.read()
+    img = plt.imshow(data[0], cmap='RdYlGn')
+    output = filePath.replace('tiff', 'png')
+    plt.axis('off')
+    plt.savefig(output, dpi=2000, bbox_inches='tight', pad_inches=0)
+
+
+def __convertThreeBands(filePath, imageType):
+    src = rasterio.open(filePath)
+    data = src.read()
+    stack1 = __normalizeArray(data[0], imageType)
+    stack2 = __normalizeArray(data[1], imageType)
+    stack3 = __normalizeArray(data[2], imageType)
+    normedd = np.dstack((stack1, stack2, stack3))
+    img = plt.imshow(normedd)
+    output = filePath.replace('tiff', 'png')
+    plt.axis('off')
+    plt.savefig(output, dpi=2000, bbox_inches='tight', pad_inches=0)
+
+
+def showImage(project, imageType, cropped=True):
 
     filePath = project.getImagePath(imageType, cropped)
     if imageType.lower() in THREEBANDS:
-        __showThreeBands(filePath, imageType, save)
+        __showThreeBands(filePath, imageType)
         return
 
     img = rasterio.open(filePath)
     ax = rasterio.plot.show(img, title=imageType,
                             cmap='RdYlGn', vmin=-1, vmax=1)
 
-    if save == True:
-        output = filePath.replace('tiff', 'png')
-        if path.exists(output):
-            return
-        fig = ax.get_figure()
-        extent = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
-        fig.savefig(output, dpi=1200, bbox_inches=extent)
 
-
-def __showThreeBands(filePath, imageType, save):
+def __showThreeBands(filePath, imageType):
     src = rasterio.open(filePath)
     data = src.read()
     stack1 = __normalizeArray(data[0], imageType)
     stack2 = __normalizeArray(data[1], imageType)
     stack3 = __normalizeArray(data[2], imageType)
-    normed = np.stack((stack1, stack2, stack3))
-    ax = rasterio.plot.show(normed)
-    if save == True:
-        output = filePath.replace('tiff', 'png')
-        if path.exists(output):
-            return
-        fig = ax.get_figure()
-        extent = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
-        fig.savefig(output, dpi=1200, bbox_inches=extent)
+    normed = np.dstack((stack1, stack2, stack3))
+    plt.imshow(normed)
+    plt.show()
 
 
 def __normalizeArray(a, imageType):
