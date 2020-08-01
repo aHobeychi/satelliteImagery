@@ -122,7 +122,7 @@ class projectManager():
 
         return results
 
-    def getImagePath(self, imageType, cropped=True):
+    def getImagePath(self, imageType, cropped):
 
         imagePath = ''
         if cropped == True:

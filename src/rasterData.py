@@ -2,8 +2,10 @@ from os import listdir, path, mkdir, sep
 import numpy as np
 import rasterio
 import matplotlib.pyplot as plt
-from rasterio import plot
-from rasterio import mask
+from osgeo import gdal
+
+
+THREEBANDS = ['rgb', 'agri', 'bathy', 'swi', 'geo']
 
 
 def createImages(project):
@@ -34,7 +36,7 @@ def cropImage(info, project):
         else:
             filepath = path.join(originalFilePath, f)
             with rasterio.open(filepath) as src:
-                out_image, out_transform = mask.mask(
+                out_image, out_transform = rasterio.mask.mask(
                     src, projection.geometry, crop=True)
                 out_meta = src.meta.copy()
                 out_meta.update({"driver": "GTiff",
@@ -197,3 +199,89 @@ def createAgri(info, project):
         rgb.write(b11.read(1), 2)
         rgb.write(b08.read(1), 3)
         rgb.close()
+
+
+# TODO EXPORT IMAGES TO SIMPLER FORMATS
+def exportToCompressedImage(project, imageType, cropped=True, imageFormat='png'):
+
+    path = project.getImagePath(imageType, cropped)
+    with rasterio.open(path) as tiffFile:
+        profile = tiffFile.profile
+        profile['driver'] = imageFormat
+
+        newFileName = path.replace('tiff', imageFormat)
+        raster = tiffFile.read()
+
+        with rasterio.open(newFileName, 'w', **profile) as output:
+            output.write(raster)
+
+
+def imageInformation(project, imageType, cropped=True):
+
+    imagePath = project.getImagePath(imageType, cropped)
+
+    dataset = gdal.Open(imagePath)
+    print('Image Raster Count: {}'.format(dataset.RasterCount))
+
+    num_bands = dataset.RasterCount
+    print('Number of bands in the image: {}'.format(num_bands))
+
+    rows = dataset.RasterYSize
+    cols = dataset.RasterXSize
+    print('Image size is: {} rows by {} columns'.format(rows, cols))
+
+    desc = dataset.GetDescription()
+    metadata = dataset.GetMetadata()
+    print('Raster description: {}'.format(desc))
+    print('Raster metadata: {}'.format(metadata))
+
+    driver = dataset.GetDriver()
+    print('Raster driver: {}'.format(driver.ShortName))
+
+    proj = dataset.GetProjection()
+    print('Image projection: {}'.format(proj))
+
+    gt = dataset.GetGeoTransform()
+    print('Image geo-transform: {gt}'.format(gt=gt))
+
+    blue = dataset.GetRasterBand(1)
+    datatype = blue.DataType
+    print('Band datatype: {}'.format(blue.DataType))
+    datatype_name = gdal.GetDataTypeName(blue.DataType)
+    print('Band datatype: {}'.format(datatype_name))
+
+    bytes = gdal.GetDataTypeSize(blue.DataType)
+    print('Band datatype size: {} bytes'.format(bytes))
+
+    band_max, band_min, band_mean, band_stddev = blue.GetStatistics(0, 1)
+    print('Band range: {} - {}'.format(band_max, band_min))
+    print('Band mean, stddev: {}, {}'.format(band_mean, band_stddev))
+
+
+def showImage(project, imageType, cropped=True):
+
+    filePath = project.getImagePath(imageType, cropped)
+    if imageType.lower() in THREEBANDS:
+        showThreeBands(filePath)
+        return
+
+    img = rasterio.open(filePath)
+    rasterio.plot.show(img, title=imageType, cmap='RdYlGn', vmin=-1, vmax=1)
+
+
+def showThreeBands(filePath):
+    src = rasterio.open(filePath)
+    data = src.read()
+    stack1 = __normalizeArray(data[0])
+    stack2 = __normalizeArray(data[1])
+    stack3 = __normalizeArray(data[2])
+    normed = np.stack((stack1, stack2, stack3))
+    rasterio.plot.show(normed)
+
+
+def __normalizeArray(a):
+
+    min = np.min(a).astype('float32')
+    max = np.max(a).astype('float32')
+    norm = 3*(a.astype('float32')-min)/(max + min)
+    return norm.clip(min=0)

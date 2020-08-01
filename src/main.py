@@ -1,6 +1,6 @@
 from apiSession import apiSession
 from projectManager import projectManager
-from rasterManipulation import createImages
+import rasterManipulation
 import imaging
 import maps
 
@@ -32,6 +32,7 @@ def main():
     projectName = 'rice lake'
     project = projectManager(projectName)
     imaging.showImage(project, 'rgb')
+    rasterManipulation.exportToCompressedImage(project, 'rgb')
 
 
 if __name__ == "__main__":
