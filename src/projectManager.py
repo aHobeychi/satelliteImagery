@@ -15,15 +15,24 @@ class projectManager():
         self.KMLPATH = os.path.join(
             baseFilePath, 'kmlFiles', projectName, '{}.kml'.format(projectName))
         self.IMGDWN = os.path.join(baseFilePath, 'outputImages', projectName)
+        self.CLASSIMG = os.path.join(
+            baseFilePath, 'classification', projectName)
         self.CROPPEDIMG = os.path.join(self.IMGDWN, 'cropped')
         self.kmlHander = kmlHandler(self.KMLPATH)
         self.api = apiSession(projectName)
+        self.__createClassificationFolder()
 
     def __createDownloadFolder(self):
         if os.path.exists(os.path.join(self.DOWNIMGPATH, self.PROJECTNAME)):
             return
         else:
             os.mkdir(os.path.join(self.DOWNIMGPATH, self.PROJECTNAME))
+
+    def __createClassificationFolder(self):
+        if os.path.exists(self.CLASSIMG):
+            return
+        else:
+            os.mkdir(self.CLASSIMG)
 
     def __createImageOutputFolder(self):
         if os.path.exists(self.IMGDWN):
@@ -69,6 +78,10 @@ class projectManager():
             imageRef.append(dict)
 
         return imageRef
+
+    def getImagePaths(self):
+
+        return references
 
     def getGeoPanda(self):
         return self.kmlHander.getGeoPanda()
@@ -122,7 +135,7 @@ class projectManager():
 
         return results
 
-    def getImagePath(self, imageType, cropped):
+    def getImagePath(self, imageType, cropped=True):
 
         imagePath = ''
         if cropped == True:
@@ -130,12 +143,16 @@ class projectManager():
             listOfFiles = os.listdir(path)
             for f in listOfFiles:
                 if imageType.lower() in f.lower():
+                    if 'png' in f or 'jpg' in f:
+                        continue
                     imagePath = os.path.join(path, f)
         else:
             path = self.IMGDWN
             listOfFiles = os.listdir(path)
             for f in listOfFiles:
                 if imageType.lower() in f.lower():
+                    if 'png' in f or 'jpg' in f:
+                        continue
                     imagePath = os.path.join(path, f)
 
         return imagePath

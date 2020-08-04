@@ -1,8 +1,7 @@
-from os import listdir, path, mkdir, sep
+from os import listdir, path, mkdir
 import numpy as np
 import rasterio
-from rasterio.plot import show
-import matplotlib.pyplot as plt
+import rasterio.mask
 from osgeo import gdal
 
 THREEBANDS = ['rgb', 'agri', 'bathy', 'swi', 'geo']
@@ -23,6 +22,7 @@ def createImages(project):
     createSWI(info, project)
     createRGB(info, project)
     createNDBI(info, project)
+    createTrainingData(project)
     cropImage(info, project)
 
 
@@ -207,6 +207,25 @@ def createAgri(info, project):
         rgb.close()
 
 
+def createTrainingData(project):
+
+    filePath = path.join(project.IMGDWN, '{}{}'.format(
+        project.PROJECTNAME, 'ALLBANDS.tiff'))
+    if path.exists(filePath):
+        return
+
+    paths = project.findImageFiles()
+    addresses = list(paths[0].values())
+    with rasterio.open(addresses[0]) as src:
+        meta = src.meta
+
+    meta.update(count=len(paths[0]))
+    with rasterio.open(filePath, 'w', **meta) as dst:
+        for id, layer in enumerate(addresses, start=1):
+            with rasterio.open(layer) as src1:
+                dst.write_band(id, src1.read(1).astype('uint16'))
+
+
 def imageInformation(project, imageType, cropped=True):
 
     imagePath = project.getImagePath(imageType, cropped)
@@ -247,66 +266,3 @@ def imageInformation(project, imageType, cropped=True):
     band_max, band_min, band_mean, band_stddev = blue.GetStatistics(0, 1)
     print('Band range: {} - {}'.format(band_max, band_min))
     print('Band mean, stddev: {}, {}'.format(band_mean, band_stddev))
-
-
-def convertPNG(project, imageType, cropped=True):
-
-    filePath = project.getImagePath(imageType, cropped)
-
-    if path.exists(filePath.replace('tiff', 'png')):
-        return
-
-    if imageType.lower() in THREEBANDS:
-        __convertThreeBands(filePath, imageType)
-        return
-
-    src = rasterio.open(filePath)
-    data = src.read()
-    img = plt.imshow(data[0], cmap='RdYlGn')
-    output = filePath.replace('tiff', 'png')
-    plt.axis('off')
-    plt.savefig(output, dpi=2000, bbox_inches='tight', pad_inches=0)
-
-
-def __convertThreeBands(filePath, imageType):
-    src = rasterio.open(filePath)
-    data = src.read()
-    stack1 = __normalizeArray(data[0], imageType)
-    stack2 = __normalizeArray(data[1], imageType)
-    stack3 = __normalizeArray(data[2], imageType)
-    normedd = np.dstack((stack1, stack2, stack3))
-    img = plt.imshow(normedd)
-    output = filePath.replace('tiff', 'png')
-    plt.axis('off')
-    plt.savefig(output, dpi=2000, bbox_inches='tight', pad_inches=0)
-
-
-def showImage(project, imageType, cropped=True):
-
-    filePath = project.getImagePath(imageType, cropped)
-    if imageType.lower() in THREEBANDS:
-        __showThreeBands(filePath, imageType)
-        return
-
-    img = rasterio.open(filePath)
-    ax = rasterio.plot.show(img, title=imageType,
-                            cmap='RdYlGn', vmin=-1, vmax=1)
-
-
-def __showThreeBands(filePath, imageType):
-    src = rasterio.open(filePath)
-    data = src.read()
-    stack1 = __normalizeArray(data[0], imageType)
-    stack2 = __normalizeArray(data[1], imageType)
-    stack3 = __normalizeArray(data[2], imageType)
-    normed = np.dstack((stack1, stack2, stack3))
-    plt.imshow(normed)
-    plt.show()
-
-
-def __normalizeArray(a, imageType):
-
-    min = np.min(a).astype('float32')
-    max = np.max(a).astype('float32')
-    norm = brightness[imageType]*(a.astype('float32')-min)/(max + min)
-    return norm.clip(min=0)

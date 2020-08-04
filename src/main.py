@@ -30,7 +30,8 @@ def imageCreation(info, project):
 def main():
     projectName = 'rice lake'
     project = projectManager(projectName)
-    rasterData.convertPNG(project, 'rgb', cropped=True)
+    # rasterData.convertPNG(project, 'rgb', cropped=True)
+    rasterData.createImages(project)
 
 
 if __name__ == "__main__":
