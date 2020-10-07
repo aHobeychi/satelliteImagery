@@ -1,6 +1,5 @@
 from sentinelsat import SentinelAPI
 import os
-import zipfile
 
 query = {
     'url': 'https://scihub.copernicus.eu/dhus',
@@ -32,7 +31,8 @@ class apiSession():
 
     def query(self, footprint):
         return self.api.query(footprint, date=(query['begin'], query['end']),
-                              platformname=query['platform'], processinglevel=query['processing'])
+                              platformname=query['platform'],
+                              processinglevel=query['processing'])
 
     def toGeoDf(self, product):
         return self.api.to_geodataframe(product)

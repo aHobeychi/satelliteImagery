@@ -4,48 +4,48 @@ from kmlHandler import kmlHandler
 from apiSession import apiSession
 
 
-class projectManager():
+class ProjectManager():
 
-    def __init__(self, projectName):
-        baseFilePath = os.path.normpath(os.getcwd() + os.sep + os.pardir)
-        self.PROJECTNAME = projectName
+    def __init__(self, projectname):
+        basefilepath = os.path.normpath(os.getcwd() + os.sep + os.pardir)
+        self.PROJECTNAME = projectname
         self.SRCPATH = os.getcwd()
-        self.DOWNIMGPATH = os.path.join(baseFilePath, 'downloadedData')
-        self.KEYPATH = os.path.join(baseFilePath, 'ressources', 'apiKey.txt')
+        self.DOWNIMGPATH = os.path.join(basefilepath, 'downloadedData')
+        self.KEYPATH = os.path.join(basefilepath, 'ressources', 'apiKey.txt')
         self.KMLPATH = os.path.join(
-            baseFilePath, 'kmlFiles', projectName, '{}.kml'.format(projectName))
-        self.IMGDWN = os.path.join(baseFilePath, 'outputImages', projectName)
+            basefilepath, 'kmlFiles', projectname, '{}.kml'.format(projectname))
+        self.IMGDWN = os.path.join(basefilepath, 'outputImages', projectname)
         self.CLASSIMG = os.path.join(
-            baseFilePath, 'classification', projectName)
+            basefilepath, 'classification', projectname)
         self.CROPPEDIMG = os.path.join(self.IMGDWN, 'cropped')
         self.kmlHander = kmlHandler(self.KMLPATH)
-        self.api = apiSession(projectName)
-        self.__createClassificationFolder()
+        self.api = apiSession(projectname)
+        self.createClassificationFolder()
 
-    def __createDownloadFolder(self):
+    def createDownloadFolder(self):
         if os.path.exists(os.path.join(self.DOWNIMGPATH, self.PROJECTNAME)):
             return
         else:
             os.mkdir(os.path.join(self.DOWNIMGPATH, self.PROJECTNAME))
 
-    def __createClassificationFolder(self):
+    def createClassificationFolder(self):
         if os.path.exists(self.CLASSIMG):
             return
         else:
             os.mkdir(self.CLASSIMG)
 
-    def __createImageOutputFolder(self):
+    def createImageOutputFolder(self):
         if os.path.exists(self.IMGDWN):
             return
         else:
             os.mkdir(self.IMGDWN)
 
-    def __unZipDownload(self):
+    def unzipDownload(self):
         downloadpath = os.path.join(self.DOWNIMGPATH, self.PROJECTNAME)
         filename = ''
-        for file in os.listdir(downloadpath):
-            if file.endswith('.zip'):
-                filename = file
+        for current_file in os.listdir(downloadpath):
+            if current_file.endswith('.zip'):
+                filename = current_file
 
         with ZipFile('{}{}{}'.format(downloadpath, os.sep, filename)) as zip_ref:
             zip_ref.extractall(downloadpath)
@@ -54,12 +54,12 @@ class projectManager():
 
         os.remove(os.path.join(downloadpath, filename))
 
-        workingFolder = '{}.SAFE'.format(filename[:end])
-        granulePath = os.path.join(downloadpath, workingFolder, 'GRANULE')
+        working_folder = '{}.SAFE'.format(filename[:end])
+        granule_path = os.path.join(downloadpath, working_folder, 'GRANULE')
 
-        fileL2A = os.listdir(granulePath)[0]
-        imagePath = os.path.join(granulePath, fileL2A, 'IMG_DATA')
-        return imagePath
+        file_l2a = os.listdir(granule_path)[0]
+        image_path = os.path.join(granule_path, file_l2a, 'IMG_DATA')
+        return image_path
 
     """create Image file location references
     """
@@ -97,12 +97,12 @@ class projectManager():
         return self.api.toGeoDf(catalog)
 
     def downloadData(self, link):
-        self.__createDownloadFolder()
-        self.api.download(link, self.DOWNIMGPATH + self.PROJECTNAME)
-        return self.__handleZippedData()
+        self.createDownloadFolder()
+        self.api.download(link, self.DOWNIMGPATH + os.sep + self.PROJECTNAME)
+        # return self.handleZippedData()
 
-    def __handleZippedData(self):
-        img = self.__unZipDownload()
+    def handleZippedData(self):
+        img = self.unzipDownload()
         return self.createImageReference(img)
 
     """return dictionnary containing image files location
@@ -114,7 +114,7 @@ class projectManager():
         granule = os.path.join(path, firstFolder, 'GRANULE')
         nextFolder = os.listdir(granule)[0]
         finalFolder = os.path.join(granule, nextFolder, 'IMG_DATA')
-        self.__createImageOutputFolder()
+        self.createImageOutputFolder()
         return self.createImageReference(finalFolder)
 
     def getImageFilesPaths(self):
@@ -156,3 +156,7 @@ class projectManager():
                     imagePath = os.path.join(path, f)
 
         return imagePath
+
+    def getClassificationPath(self, filename):
+
+        return self.CLASSIMG + os.sep + filename

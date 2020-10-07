@@ -1,7 +1,7 @@
-from apiSession import apiSession
-from projectManager import projectManager
+from projectManager import ProjectManager
 import rasterData
-import maps
+from display import showImage, showClassification
+from classification import createKmeansClassification
 
 
 def getData(project):
@@ -23,15 +23,20 @@ def getData(project):
     project.downloadData(toDownload)
 
 
-def imageCreation(info, project):
-    createImages(info, project)
 
 
 def main():
-    projectName = 'rice lake'
-    project = projectManager(projectName)
+    projectName = 'sanFrancisco'
+    project = ProjectManager(projectName)
+    # createKmeansClassification(project,4)
+    # rasterData.createImages(project)
+    # showImage(project,'ndvi')
+    # showClassification(project, 4)
+
+    # getData(project)
+
     # rasterData.convertPNG(project, 'rgb', cropped=True)
-    rasterData.createImages(project)
+    # rasterData.createImages(project)
 
 
 if __name__ == "__main__":

@@ -57,6 +57,19 @@ def showImage(project, imageType, cropped=True):
                             cmap='RdYlGn', vmin=-1, vmax=1)
 
 
+def showClassification(project, clusters, imgType='allbands'):
+
+    filename = "{}_kMeans_{}.tiff".format(imgType, clusters)
+    filePath = project.getClassificationPath(filename)
+    img = rasterio.open(filePath)
+    # ax = rasterio.plot.show(img, title=imgType,
+    #                         cmap='RdYlGn', vmin=-1, vmax=1)
+    ax = rasterio.plot.show(img, title=imgType)
+
+
+
+
+
 def __showThreeBands(filePath, imageType):
     src = rasterio.open(filePath)
     data = src.read()
@@ -70,7 +83,7 @@ def __showThreeBands(filePath, imageType):
 
 def __normalizeArray(a, imageType):
 
-    min = np.min(a).astype('float32')
-    max = np.max(a).astype('float32')
-    norm = brightness[imageType]*(a.astype('float32')-min)/(max + min)
-    return norm.clip(min=0)
+    arr_min = np.arr_min(a).astype('float32')
+    arr_max = np.arr_max(a).astype('float32')
+    norm = brightness[imageType]*(a.astype('float32')-arr_min)/(arr_max + arr_min)
+    return norm.clip(arr_min=0)
