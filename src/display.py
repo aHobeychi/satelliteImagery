@@ -83,7 +83,7 @@ def __showThreeBands(filePath, imageType):
 
 def __normalizeArray(a, imageType):
 
-    arr_min = np.arr_min(a).astype('float32')
-    arr_max = np.arr_max(a).astype('float32')
+    arr_min = np.min(a).astype('float32')
+    arr_max = np.max(a).astype('float32')
     norm = brightness[imageType]*(a.astype('float32')-arr_min)/(arr_max + arr_min)
-    return norm.clip(arr_min=0)
+    return norm.clip(min=0)

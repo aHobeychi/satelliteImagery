@@ -1,6 +1,6 @@
 from projectManager import ProjectManager
 import rasterData
-from display import showImage, showClassification
+from display import showImage, showClassification, convertPNG
 from classification import createKmeansClassification
 
 
@@ -26,16 +26,20 @@ def getData(project):
 
 
 def main():
+    # 1. create project
     projectName = 'sanFrancisco'
     project = ProjectManager(projectName)
+    # 2. download data
+    # getData(project)
+
     # createKmeansClassification(project,4)
     # rasterData.createImages(project)
     # showImage(project,'ndvi')
-    # showClassification(project, 4)
+    showClassification(project, 4)
 
     # getData(project)
 
-    # rasterData.convertPNG(project, 'rgb', cropped=True)
+    # convertPNG(project, 'rgb', cropped=False)
     # rasterData.createImages(project)
 
 
