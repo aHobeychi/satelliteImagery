@@ -1,3 +1,9 @@
+"""
+Handles the project structure,
+creation of different project specific folder,
+unzipping the data and keeping track of the image paths
+"""
+
 import os
 from zipfile import ZipFile
 from kmlHandler import kmlHandler
@@ -136,7 +142,6 @@ class ProjectManager():
         return results
 
     def getImagePath(self, imageType, cropped=True):
-
         imagePath = ''
         if cropped == True:
             path = self.CROPPEDIMG
@@ -158,5 +163,4 @@ class ProjectManager():
         return imagePath
 
     def getClassificationPath(self, filename):
-
         return self.CLASSIMG + os.sep + filename

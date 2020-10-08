@@ -1,3 +1,7 @@
+"""
+DISPLAY SATELLITE IMAGERY AND CLASSIFICATION RESULTS
+"""
+
 from os import path
 import numpy as np
 import rasterio
@@ -81,6 +85,7 @@ def __showThreeBands(filePath, imageType):
     plt.show()
 
 
+# NORMALIZES THE DATA TO FIT WITHIN THE IMAGE BAND
 def __normalizeArray(a, imageType):
 
     arr_min = np.min(a).astype('float32')

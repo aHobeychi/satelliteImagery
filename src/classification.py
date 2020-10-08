@@ -1,3 +1,7 @@
+"""
+CLASSIFICATION FILE, USED TO ADD CLUSTERING TO IMAGES
+"""
+
 import os
 from sklearn.cluster import KMeans
 import gdal

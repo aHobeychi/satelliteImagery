@@ -1,6 +1,9 @@
+"""
+file is not currently implemented in the project
+"""
+
 import osmnx as ox
 import matplotlib.pyplot as plt
-import geopandas as gdp
 
 """Gets Edges and nodes of the map
 """

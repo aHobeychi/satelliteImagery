@@ -1,6 +1,12 @@
+"""
+HANDLES API SESSION AND DOWNLOADS DATA
+REQUIRES AN API KEY FROM https://scihub.copernicus.eu/dhus/
+"""
+
 from sentinelsat import SentinelAPI
 import os
 
+# API QUERY PARAMETERS
 query = {
     'url': 'https://scihub.copernicus.eu/dhus',
     'platform': 'Sentinel-2',

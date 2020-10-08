@@ -1,3 +1,10 @@
+"""
+raster data creates the imagery from the different spectral band
+info about the band can be found at: 
+https://gisgeography.com/sentinel-2-bands-combinations/ 
+https://www.satimagingcorp.com/satellite-sensors/other-satellite-sensors/sentinel-2a/
+"""
+
 from os import listdir, path, mkdir
 import numpy as np
 import rasterio
@@ -255,13 +262,12 @@ def imageInformation(project, imageType, cropped=True):
     print('Image geo-transform: {gt}'.format(gt=gt))
 
     blue = dataset.GetRasterBand(1)
-    datatype = blue.DataType
     print('Band datatype: {}'.format(blue.DataType))
     datatype_name = gdal.GetDataTypeName(blue.DataType)
     print('Band datatype: {}'.format(datatype_name))
 
-    bytes = gdal.GetDataTypeSize(blue.DataType)
-    print('Band datatype size: {} bytes'.format(bytes))
+    type_size = gdal.GetDataTypeSize(blue.DataType)
+    print('Band datatype size: {} bytes'.format(type_size))
 
     band_max, band_min, band_mean, band_stddev = blue.GetStatistics(0, 1)
     print('Band range: {} - {}'.format(band_max, band_min))
