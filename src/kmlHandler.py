@@ -18,8 +18,8 @@ class kmlHandler():
         else:
             return gdp.read_file(filePath)
 
-    def createProjection(self, projectionType):
-        return gdp.read_file(self.filePath).to_crs(projectionType)
+    def create_projection(self, projection_type, file_path):
+        return gdp.read_file(file_path).to_crs(projection_type)
 
     def setFilePath(self, filePath):
         self.filePath = filePath

@@ -17,7 +17,3 @@ def createGeometry(points):
 
     """Returns the coordinate of the top left Corner.
     """
-
-
-def getTopleftCorner(listOfPoints):
-    print('')

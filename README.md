@@ -4,42 +4,37 @@ Project that uses Sentinel-2 satellite to download and classify spatial imagery
 
 ## Project Structure
 ├── assets  
-├── classification  
-│   ├── montreal    
-│   └── sanFrancisco    
-│       ├── allbands_kMeans_4.tiff  
-│       └── Figure_1.png  
-├── downloadedData  
-│   └── sanFrancisco  
-│       └── S2B_MSIL2A_20191022T185429_N0213_R113_T10SEG_20191022T214432.SAFE  
 ├── env  
 │   └── environment.yml  
 ├── kmlFiles  
+│   ├── montreal.kml  
+│   ├── sanfrancisco.kml  
+├── projects  
 │   ├── montreal  
+│   │   ├── classfication  
+│   │   ├── data  
+│   │   │   └── 2019_09_18  
+│   │   ├── images  
+│   │   │   └── cropped  
 │   │   └── montreal.kml  
-│   ├── sanFrancisco  
-│   │   └── sanFrancisco.kml  
-├── outputImages  
-│   └── sanFrancisco  
-│       ├── cropped  
-│       │   ├── sanFranciscoAGRI_Cropped.tiff  
-│       │   └── sanFranciscoRGB_Cropped.tiff  
-│       ├── sanFranciscoALLBANDS.tiff  
-│       └── sanFranciscoRGB.tiff  
+│   └── sanfrancisco  
+│       ├── classfication  
+│       ├── data  
+│       │   └── 2019_10_22  
+│       └── sanfrancisco.kml  
 ├── README.md  
 ├── ressources  
 │   ├── apiKeyTemplate.txt  
 │   └── apiKey.txt  
 └── src  
-    ----├── apiSession.py : to handle requesting and downloaded the satellite imagery  
-    ----├── classification.py : to classify the imagery  
-    ----├── display.py : to display the satellite imagery and the classification results  
-    ----├── geometryObject.py : to handle the geometry of the are, useful when cropping  
-    ----├── kmlHandler.py : to handle the kml file which will be used to get coordinates of images  
-    ----├── main.py  
-    ----├── maps.py : currently not used  
-    ----├── projectManager.py : handles the project structure and keeps track of the imagepaths  
-    ----└── rasterData.py : handles the imagery and allows for manipulation  
+    ├── apiSession.py  
+    ├── classification.py  
+    ├── display.py  
+    ├── geometryObject.py  
+    ├── kmlHandler.py  
+    ├── main.py  
+    ├── projectManager.py  
+    └── rasterData.py  
 <br/>
 
 ___

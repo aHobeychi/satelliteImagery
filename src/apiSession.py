@@ -44,6 +44,7 @@ class apiSession():
         return self.api.to_geodataframe(product)
 
     def download(self, link, directory):
+        print(directory)
         self.api.download(
             link, directory_path=directory)
 

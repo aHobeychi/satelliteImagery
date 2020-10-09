@@ -8,36 +8,41 @@ import gdal
 import numpy as np
 
 
-def createKmeansClassification(project, clusters, imgType='allbands'):
+def kmeans_classifiy(project, clusters, image_type='allbands', cropped=True):
 
-    imagePath = project.getImagePath(imgType)
-    driverTiff = gdal.GetDriverByName('GTiff')
-    rasterData = gdal.Open(imagePath)
-    nbands = rasterData.RasterCount
-    data = np.empty((rasterData.RasterXSize*rasterData.RasterYSize, nbands))
+    image_path = project.get_image_paths(image_type, cropped)
+    tiff_driver = gdal.GetDriverByName('GTiff')
+    raster_data = gdal.Open(image_path)
+    nbands = raster_data.RasterCount
+    data = np.empty((raster_data.RasterXSize*raster_data.RasterYSize, nbands))
 
+    print(image_path)
     for i in range(1, nbands+1):
-        band = rasterData.GetRasterBand(i).ReadAsArray()
+        band = raster_data.GetRasterBand(i).ReadAsArray()
         data[:, i-1] = band.flatten()
 
     km = KMeans(n_clusters=clusters)
     km.fit(data)
     km.predict(data)
 
-    out_data = km.labels_.reshape((rasterData.RasterYSize,
-                                   rasterData.RasterXSize))
+    out_data = km.labels_.reshape((raster_data.RasterYSize,
+                                  raster_data.RasterXSize))
 
-    outputPath = os.path.join(
-        project.CLASSIMG, '{}_kMeans_{}.tiff'.format(imgType, clusters))
+    date = image_path.split('/')[-2]
 
-    if os.path.exists(outputPath):
+    output_path = (project.get_classification_folder_path() + date +
+                   os.sep + '{}_kMeans_{}.tiff'.format(image_type, clusters))
+
+    if os.path.exists(output_path):
         return
 
     # save the original image with gdal
-    outputData = driverTiff.Create(outputPath,
-                                   rasterData.RasterXSize, rasterData.RasterYSize,
-                                   1, gdal.GDT_Float32)
-    outputData.SetGeoTransform(rasterData.GetGeoTransform())
-    outputData.SetProjection(rasterData.GetProjection())
-    outputData.GetRasterBand(1).SetNoDataValue(-9999.0)
-    outputData.GetRasterBand(1).WriteArray(out_data)
+    output_data = tiff_driver.Create(output_path,
+                                     raster_data.RasterXSize,
+                                     raster_data.RasterYSize,
+                                     1, gdal.GDT_Float32)
+
+    output_data.SetGeoTransform(raster_data.GetGeoTransform())
+    output_data.SetProjection(raster_data.GetProjection())
+    output_data.GetRasterBand(1).SetNoDataValue(-9999.0)
+    output_data.GetRasterBand(1).WriteArray(out_data)
