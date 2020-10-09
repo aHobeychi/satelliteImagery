@@ -3,68 +3,51 @@ import fiona
 import geometryObject
 
 
-class kmlHandler():
+class KmlHandler():
 
-    def __init__(self, filePath=False):
+    def __init__(self, filepath=False):
         fiona.supported_drivers['kml'] = 'rw'
         fiona.supported_drivers['KML'] = 'rw'
         fiona.supported_drivers['LIBKML'] = 'rw'
-        if filePath != False:
-            self.filePath = filePath
+        if filepath is not False:
+            self.filepath = filepath
 
-    def getGeoPanda(self, filePath=False):
-        if filePath == False:
-            return gdp.read_file(self.filePath)
+    def get_geo_pandaa(self, filepath=False):
+        if filepath is False:
+            return gdp.read_file(self.filepath)
         else:
-            return gdp.read_file(filePath)
+            return gdp.read_file(filepath)
 
     def create_projection(self, projection_type, file_path):
         return gdp.read_file(file_path).to_crs(projection_type)
 
-    def setFilePath(self, filePath):
-        self.filePath = filePath
+    def set_file_path(self, filepath):
+        self.file_path = filepath
 
-    def getFootPrint(self, filePath=False):
-        if filePath == False:
-            return self.createFootPrint()
+    def get_foot_print(self, filepath=False):
+
+        if filepath is False:
+            return self.create_projection()
         else:
-            return self.createFootPrint(filePath)
+            return self.create_foot_print(filepath)
 
         """returns a list from a polygon object.
         """
-
-    def polygonToListOfPoints(self, polygon):
-
-        stringRep = str(polygon)
-        start = stringRep.find('(')
-        stringRep = stringRep[start:]
-        stringRep = stringRep.replace('(', '').strip().replace(')', '').strip()
-        listOfCoord = stringRep.split(',')
-
-        listOfPoints = []
-        for coords in listOfCoord:
-            point = []
-            point.append(coords.split(' '))
-            for p in point:
-                if p != '':
-                    listOfPoints.append(p)
-
-        return listOfPoints
 
     """returns dictionnary containing all usefull information of the
         given kml file
     """
 
-    def parseKml(self, filePath):
+    def parse_kml(self, filepath):
 
         information = {}
 
-        with open(filePath, 'r') as myfile:
+        with open(filepath, 'r') as myfile:
             data = myfile.read()
 
-        coordStart = data.find('<coordinates>')
-        coordEnd = data.find('</coordinates>')
-        coords = data[coordStart:coordEnd].replace(
+        coord_start = data.find('<coordinates>')
+        coord_end = data.find('</coordinates>')
+        coords = data[coord_start:coord_end].replace(
             '<coordinates>', '').strip().split(' ')
         coordinates = []
         for points in coords:
@@ -76,18 +59,18 @@ class kmlHandler():
 
         return information
 
-    def createFootPrint(self, filePath=False):
+    def create_foot_print(self, filepath=False):
 
-        if filePath == False:
-            parsedKml = self.parseKml(self.filePath)
-            listOfCoordinates = geometryObject.\
-                removeThridDimension(parsedKml['coordinates'])
-            footprint = geometryObject.createGeometry(listOfCoordinates)
+        if filepath is False:
+            parsed_kml = self.parseKml(self.filepath)
+            list_of_coordinates = (geometryObject.removeThridDimension
+                                   (parsed_kml['coordinates']))
+            footprint = geometryObject.create_geometry(list_of_coordinates)
             return footprint
 
         else:
-            parsedKml = self.parseKml(filePath)
-            listOfCoordinates = geometryObject.\
-                removeThridDimension(parsedKml['coordinates'])
-            footprint = geometryObject.createGeometry(listOfCoordinates)
+            parsed_kml = self.parse_kml(filepath)
+            list_of_coordinates = (geometryObject.remove_third_dimension
+                                   (parsed_kml['coordinates']))
+            footprint = geometryObject.create_geometry(list_of_coordinates)
             return footprint

@@ -1,7 +1,7 @@
 """
 raster data creates the imagery from the different spectral band
-info about the band can be found at: 
-https://gisgeography.com/sentinel-2-bands-combinations/ 
+info about the band can be found at:
+https://gisgeography.com/sentinel-2-bands-combinations/
 https://www.satimagingcorp.com/satellite-sensors/other-satellite-sensors/sentinel-2a/
 """
 
@@ -180,7 +180,7 @@ def create_geo(info, project, output):
 
 def create_bathy(info, project, output):
 
-    filepath = path.join(output, '_{}_{}'.format(
+    filepath = path.join(output, '{}_{}'.format(
         project.project_name, 'BAT.tiff'))
 
     r10 = info[0][0]
@@ -200,7 +200,7 @@ def create_bathy(info, project, output):
 
 def create_agri(info, project, output):
 
-    filepath = path.join(output, '_{}_{}'.format(
+    filepath = path.join(output, '{}_{}'.format(
         project.project_name, 'AGRI.tiff'))
 
     r10 = info[0][0]

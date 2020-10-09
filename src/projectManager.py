@@ -7,8 +7,8 @@ unzipping the data and keeping track of the image paths
 import os
 from shutil import copy, move
 from zipfile import ZipFile
-from kmlHandler import kmlHandler
-from apiSession import apiSession
+from kmlHandler import KmlHandler
+from apiSession import ApiSession
 
 
 class ProjectManager():
@@ -20,8 +20,8 @@ class ProjectManager():
         self.project_name = ''
         if not project_name == '':
             self.add_project(project_name)
-        self.kml_handler = kmlHandler()
-        self.api_session = apiSession(project_name)
+        self.kml_handler = KmlHandler()
+        self.api_session = ApiSession(project_name)
 
     def create_project_structure(self):
         projects_folder = self.root_folder + os.sep + 'projects'
@@ -30,12 +30,10 @@ class ProjectManager():
 
     def add_project(self, project_name):
         self.project_name = project_name
-        self.add_kml(self.project_name)
-        self.api_session = apiSession(project_name)
         folder_path = self.projects_folder + os.sep + project_name
         data_path = folder_path + os.sep + 'data'
         images_path = folder_path + os.sep + 'images'
-        classification_path = folder_path + os.sep + 'classfication'
+        classification_path = folder_path + os.sep + 'classification'
 
         if os.path.exists(folder_path):
             print('project already exists')
@@ -45,6 +43,10 @@ class ProjectManager():
             os.mkdir(images_path)
             os.mkdir(classification_path)
             print('project created succesfully')
+
+        self.add_kml()
+        self.add_kml(self.project_name)
+        self.api_session = ApiSession(project_name)
 
     def set_project_name(self, project_name):
         self.project_name = project_name
@@ -116,12 +118,12 @@ class ProjectManager():
     def get_footprint(self):
         kml_path = (self.projects_folder + os.sep +
                     self.project_name + os.sep + self.project_name + '.kml')
-        return self.kml_handler.getFootPrint(kml_path)
+        return self.kml_handler.get_foot_print(kml_path)
 
     def get_catalog(self):
         footprint = self.get_footprint()
         query = self.api_session.query(footprint)
-        return self.api_session.toGeoDf(query)
+        return self.api_session.to_geo_df(query)
 
     def download_data(self, link):
         self.api_session.download(link, self.get_download_path())
@@ -140,8 +142,11 @@ class ProjectManager():
 
         if not os.path.exists(image_path + all_dates[int(selected)]):
             os.mkdir(image_path + all_dates[int(selected)])
-            os.mkdir(self.get_classification_folder_path +
-                     all_dates[int(selected)])
+            os.mkdir(image_path + all_dates[int(selected)] + os.sep + 'cropped')
+            os.mkdir(self.get_classification_folder_path() +
+                     all_dates[int(selected)] + os. sep)
+            os.mkdir(self.get_classification_folder_path() +
+                     all_dates[int(selected)] + os. sep + 'cropped')
         else:
             return False
         if not os.path.exists(image_path + all_dates[int(selected)] +
@@ -186,7 +191,32 @@ class ProjectManager():
 
         if cropped:
             path = path + os.sep + 'cropped'
-        
+
         for files in os.listdir(path):
             if image_type in files.lower():
                 return path + os.sep + files
+
+    def get_classification_path(self, image_type, n_clusters, cropped=True):
+        classification_path = self.get_classification_folder_path()
+        all_dates = os.listdir(classification_path)
+
+        print('Select one of the dates to view the classification:')
+
+        for num, date in enumerate(all_dates):
+            print('({}): {}'.format(num, date))
+
+        selected = input()
+        selection = all_dates[int(selected)]
+
+        final_folder = ''
+        if cropped:
+            final_folder = classification_path + selection + os.sep + 'cropped'
+        else:
+            final_folder = classification_path + selected
+
+        for files in os.listdir(final_folder):
+            if image_type in files.lower():
+                if str(n_clusters) in files:
+                    return final_folder + os.sep + files
+
+

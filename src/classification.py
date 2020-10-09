@@ -28,14 +28,21 @@ def kmeans_classifiy(project, clusters, image_type='allbands', cropped=True):
     out_data = km.labels_.reshape((raster_data.RasterYSize,
                                   raster_data.RasterXSize))
 
-    date = image_path.split('/')[-2]
+    date = 0
+    output_path = ''
+    if cropped:
+        date = image_path.split('/')[-3]
+        output_path = (project.get_classification_folder_path() + date +
+                       os.sep + 'cropped' + os.sep +
+                       '{}_kMeans_{}.tiff'.format(image_type, clusters))
+    else:
+        date = image_path.split('/')[-2]
+        output_path = (project.get_classification_folder_path() + date +
+                       os.sep +
+                       '{}_kMeans_{}.tiff'.format(image_type, clusters))
 
-    output_path = (project.get_classification_folder_path() + date +
-                   os.sep + '{}_kMeans_{}.tiff'.format(image_type, clusters))
 
-    if os.path.exists(output_path):
-        return
-
+    print(output_path)
     # save the original image with gdal
     output_data = tiff_driver.Create(output_path,
                                      raster_data.RasterXSize,

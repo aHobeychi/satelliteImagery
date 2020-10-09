@@ -5,6 +5,7 @@ DISPLAY SATELLITE IMAGERY AND CLASSIFICATION RESULTS
 from os import path
 import numpy as np
 import rasterio
+from rasterio.plot import show
 import matplotlib.pyplot as plt
 
 THREEBANDS = ['rgb', 'agri', 'bathy', 'swi', 'geo']
@@ -67,8 +68,8 @@ def show_image(project, image_type, cropped=True):
 
 def show_classification(project, clusters, image_type='allbands'):
 
-    filename = "{}_kMeans_{}.tiff".format(image_type, clusters)
-    filepath = project.getClassificationPath(filename)
+    filepath = project.get_classification_path(image_type, clusters)
+    print(filepath)
     img = rasterio.open(filepath)
     ax = rasterio.plot.show(img, title=image_type)
 

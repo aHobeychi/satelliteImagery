@@ -1,5 +1,5 @@
 # from projectManager import ProjectManager
-from projectManager2 import ProjectManager
+from projectManager import ProjectManager
 import rasterData
 from display import show_image, show_classification, convert_to_png
 from classification import kmeans_classifiy
@@ -30,7 +30,7 @@ def get_data(project):
 def main():
 
     # 1. create project
-    projectName = 'sanfrancisco'
+    projectName = 'montreal'
     project = ProjectManager(projectName)
 
     # 2. download data
