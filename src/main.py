@@ -1,19 +1,15 @@
-# from projectManager import ProjectManager
 from projectManager import ProjectManager
 import rasterData
 from display import show_image, show_classification, convert_to_png
-from classification import kmeans_classifiy
+from classification import kmeans_classifiy, plot_cost_function
 
 
-def get_data(project):
+def download_sample(project):
 
     footprint = project.get_footprint()
-    # catalog = project.getGeoDataFrame(footprint)
     catalog = project.get_catalog()
-
     # REMOVE LINKS WITH TOO MUCH CLOUD COVERAGE
     catalog = catalog[catalog.cloudcoverpercentage < 1]
-
     # REMOVE THOSE WHERE THE FOOTPRINT ISNT FULLY CONTAINED
     # MEANING WHERE THE AREA OF INTEREST ISN'T TOTALLY CONTAINED IN THE
     # SATELLITE IMAGE
@@ -36,7 +32,7 @@ def main():
     # 2. download data
     answ = input('Do you want to download the data (y/n)?: ')
     if answ == 'y':
-        get_data(project)
+        download_sample(project)
 
     # 3. create images
     answ = input('Do you want to create the images (y/n)?: ')
@@ -54,12 +50,14 @@ def main():
     # 5. classify the image
     answ = input('Do you want to classify the images (y/n)?: ')
     if answ == 'y':
-        kmeans_classifiy(project, clusters, 'rgb')
+        kmeans_classifiy(project, clusters, 'ndvi', False)
+        # plot_cost_function(project, 'ndvi')
 
     # 6. show classified image
     answ = input('Do you want to show the classified images (y/n)?: ')
     if answ == 'y':
-        show_classification(project, clusters, 'rgb')
+        convert_to_png(project, 'ndvi', False, True, clusters)
+        # show_classification(project, clusters, 'ndvi', False)
 
 
 if __name__ == "__main__":

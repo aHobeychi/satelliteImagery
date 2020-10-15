@@ -12,7 +12,7 @@ class KmlHandler():
         if filepath is not False:
             self.filepath = filepath
 
-    def get_geo_pandaa(self, filepath=False):
+    def get_geo_pandas(self, filepath=False):
         if filepath is False:
             return gdp.read_file(self.filepath)
         else:

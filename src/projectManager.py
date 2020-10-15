@@ -9,6 +9,7 @@ from shutil import copy, move
 from zipfile import ZipFile
 from kmlHandler import KmlHandler
 from apiSession import ApiSession
+from datetime import date
 
 
 class ProjectManager():
@@ -21,7 +22,7 @@ class ProjectManager():
         if not project_name == '':
             self.add_project(project_name)
         self.kml_handler = KmlHandler()
-        self.api_session = ApiSession(project_name)
+        self.api_session = ApiSession()
 
     def create_project_structure(self):
         projects_folder = self.root_folder + os.sep + 'projects'
@@ -46,7 +47,7 @@ class ProjectManager():
 
         self.add_kml()
         self.add_kml(self.project_name)
-        self.api_session = ApiSession(project_name)
+        self.api_session = ApiSession()
 
     def set_project_name(self, project_name):
         self.project_name = project_name
@@ -126,10 +127,13 @@ class ProjectManager():
         return self.api_session.to_geo_df(query)
 
     def download_data(self, link):
+        """downloads the data from the specific link"""
         self.api_session.download(link, self.get_download_path())
         self.unzip_downlaod()
 
+
     def get_resolution_paths(self):
+        """returns the path of the resolution from the data forlder"""
         data_path = self.get_download_path()
         image_path = self.get_images_folder_path()
         all_dates = os.listdir(data_path)
@@ -212,11 +216,10 @@ class ProjectManager():
         if cropped:
             final_folder = classification_path + selection + os.sep + 'cropped'
         else:
-            final_folder = classification_path + selected
+            final_folder = classification_path + selection
 
         for files in os.listdir(final_folder):
             if image_type in files.lower():
                 if str(n_clusters) in files:
                     return final_folder + os.sep + files
-
 

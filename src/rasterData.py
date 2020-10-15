@@ -9,7 +9,6 @@ from os import listdir, path
 import numpy as np
 import rasterio
 import rasterio.mask
-from osgeo import gdal
 
 THREEBANDS = ['rgb', 'agri', 'bathy', 'swi', 'geo']
 
@@ -21,20 +20,22 @@ BRIGHTNESS = {
 
 
 def create_images(project):
+    """creates all desired images"""
     info = project.get_resolution_paths()
     if info is False:
         print('images were already created')
         return
 
     output = info[1]
-    create_agri(info, project, output)
-    create_bathy(info, project, output)
-    create_geo(info, project, output)
-    create_ndvi(info, project, output)
-    create_swi(info, project, output)
     create_rgb(info, project, output)
+    create_ndvi(info, project, output)
     create_ndbi(info, project, output)
-    create_all_bands(info, project, output)
+    # create_all_bands(info, project, output)
+    # create_agri(info, project, output)
+    # create_bathy(info, project, output)
+    # create_geo(info, project, output)
+    # create_swi(info, project, output)
+
     crop_images(info, project, output)
 
 
@@ -49,18 +50,17 @@ def crop_images(info, project, output):
     files = listdir(non_cropped_path)
     for data in files:
         if (path.isdir(path.join(non_cropped_path, data)) or
-                '_Cropped' in data or '.aux' in data):
+                '_Cropped' in data or '.aux' in data or 'ALLBANDS' in data):
             continue
-        else:
-            filepath = path.join(non_cropped_path, data)
-            with rasterio.open(filepath) as src:
-                out_image, out_transform = rasterio.mask.mask(
-                    src, projection.geometry, crop=True)
-                out_meta = src.meta.copy()
-                out_meta.update({"driver": "GTiff",
-                                 "height": out_image.shape[1],
-                                 "width": out_image.shape[2],
-                                 "transform": out_transform})
+        filepath = path.join(non_cropped_path, data)
+        with rasterio.open(filepath) as src:
+            out_image, out_transform = rasterio.mask.mask(
+                src, projection.geometry, crop=True)
+            out_meta = src.meta.copy()
+            out_meta.update({"driver": "GTiff",
+                             "height": out_image.shape[1],
+                             "width": out_image.shape[2],
+                             "transform": out_transform})
 
         write_path = path.join(output_path, data.replace('.tiff',
                                                          '_Cropped.tiff'))
@@ -69,6 +69,7 @@ def crop_images(info, project, output):
 
 
 def create_ndbi(info, project, output):
+    """creates moisure index dataset"""
 
     filepath = path.join(output, '{}_{}'.format(
         project.project_name, 'NDBI.tiff'))
@@ -94,6 +95,7 @@ def create_ndbi(info, project, output):
 
 
 def create_ndvi(info, project, output):
+    """creates vegetation index dataset"""
 
     filepath = path.join(output, '{}_{}'.format(
         project.project_name, 'NDVI.tiff'))
@@ -105,7 +107,7 @@ def create_ndvi(info, project, output):
     nir = nir_reader.read(1).astype('float64')
     red = red_reader.read(1).astype('float64')
 
-    ndvi = np.divide((nir-red), (nir+red))
+    ndvi = np.where((nir+red) == 0, 0, (nir-red)/(nir+red))
     ndvi_image = rasterio.open(filepath, 'w', driver='Gtiff',
                                width=nir_reader.width,
                                height=nir_reader.height,
@@ -138,6 +140,7 @@ def create_swi(info, project, output):
 
 
 def create_rgb(info, project, output):
+    """create rgb dataset"""
 
     filepath = path.join(output, '{}_{}'.format(
         project.project_name, 'RGB.tiff'))
@@ -220,6 +223,7 @@ def create_agri(info, project, output):
 
 
 def create_all_bands(info, project, output):
+    """creates dataset containing all spectral bands superimposed"""
 
     file_path = path.join(output, '{}_{}'.format(
         project.project_name, 'ALLBANDS.tiff'))
@@ -233,44 +237,3 @@ def create_all_bands(info, project, output):
         for ids, layer in enumerate(addresses, start=1):
             with rasterio.open(layer) as src1:
                 dst.write_band(ids, src1.read(1).astype('uint16'))
-
-
-def image_information(project, image_type, cropped=True):
-
-    image_path = project.getImagePath(image_type, cropped)
-
-    dataset = gdal.Open(image_path)
-    print('Image Raster Count: {}'.format(dataset.RasterCount))
-
-    num_bands = dataset.RasterCount
-    print('Number of bands in the image: {}'.format(num_bands))
-
-    rows = dataset.RasterYSize
-    cols = dataset.RasterXSize
-    print('Image size is: {} rows by {} columns'.format(rows, cols))
-
-    desc = dataset.GetDescription()
-    metadata = dataset.GetMetadata()
-    print('Raster description: {}'.format(desc))
-    print('Raster metadata: {}'.format(metadata))
-
-    driver = dataset.GetDriver()
-    print('Raster driver: {}'.format(driver.ShortName))
-
-    proj = dataset.GetProjection()
-    print('Image projection: {}'.format(proj))
-
-    gt = dataset.GetGeoTransform()
-    print('Image geo-transform: {gt}'.format(gt=gt))
-
-    blue = dataset.GetRasterBand(1)
-    print('Band datatype: {}'.format(blue.DataType))
-    datatype_name = gdal.GetDataTypeName(blue.DataType)
-    print('Band datatype: {}'.format(datatype_name))
-
-    type_size = gdal.GetDataTypeSize(blue.DataType)
-    print('Band datatype size: {} bytes'.format(type_size))
-
-    band_max, band_min, band_mean, band_stddev = blue.GetStatistics(0, 1)
-    print('Band range: {} - {}'.format(band_max, band_min))
-    print('Band mean, stddev: {}, {}'.format(band_mean, band_stddev))
