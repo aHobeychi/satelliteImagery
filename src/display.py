@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 THREEBANDS = ['rgb', 'agri', 'bathy', 'swi', 'geo']
 
 BRIGHTNESS = {
-    'rgb': 5,
+    'rgb': 1,
     'agri': 3,
     'geo': 2,
 }
@@ -89,7 +89,7 @@ def __show_three_bands(file_path, image_type):
     stack2 = __normalize_array(data[1], image_type)
     stack3 = __normalize_array(data[2], image_type)
     normed = np.dstack((stack1, stack2, stack3))
-    plt.imshow(normed)
+    plt.imshow(np.clip(normed, 0,1))
     plt.show()
 
 

@@ -10,14 +10,6 @@ import numpy as np
 import rasterio
 import rasterio.mask
 
-THREEBANDS = ['rgb', 'agri', 'bathy', 'swi', 'geo']
-
-BRIGHTNESS = {
-    'rgb': 8,
-    'agri': 3,
-    'geo': 2,
-}
-
 
 def create_images(project):
     """creates all desired images"""
@@ -43,17 +35,14 @@ def crop_images(info, project, output):
 
     b02 = rasterio.open(info[0][0]['B02'])
     proj_type = b02.crs
-    # projection = project.create_projection(proj_type)
     projection = project.get_bounding_box(proj_type)
-    print(projection.geometry)
-    print(type(projection.geometry))
     non_cropped_path = output
     output_path = path.join(output, 'cropped')
 
     files = listdir(non_cropped_path)
     for data in files:
         if (path.isdir(path.join(non_cropped_path, data)) or
-                '_Cropped' in data or '.aux' in data or 'ALLBANDS' in data):
+                '_Cropped' in data or '.aux' in data):
             continue
         filepath = path.join(non_cropped_path, data)
         with rasterio.open(filepath) as src:
@@ -232,6 +221,7 @@ def create_all_bands(info, project, output):
         project.project_name, 'ALLBANDS.tiff'))
 
     addresses = list(info[0][0].values())
+    meta = ''
     with rasterio.open(addresses[0]) as src:
         meta = src.meta
 

@@ -1,8 +1,8 @@
 from projectManager import ProjectManager
 import rasterData
 from display import show_image, show_classification, convert_to_png
-from classification import kmeans_classifiy, plot_cost_function, normalize_rgb_values
-from classification import normalized_kmeans
+from classification import kmeans_cluster, plot_cost_function
+from classification import dbscan_cluster, gmm_cluster
 
 
 def download_sample(project):
@@ -31,7 +31,7 @@ def download_sample(project):
 def main():
 
     # 1. create project
-    projectName = 'sanfrancisco'
+    projectName = 'fuji'
     project = ProjectManager(projectName)
 
     # # 2. download data
@@ -47,20 +47,23 @@ def main():
     # 4. display the image
     answ = input('Do you want to display the images (y/n)?: ')
     if answ == 'y':
-        show_image(project, 'rgb')
+        show_image(project, 'rgb', cropped = False)
         # convert_to_png(project, 'rgb', cropped=False)
 
     # CLASSIFICATION
-    clusters = 5
+    clusters = 2
     cropped = True
-    image_type = 'rgb'
+    image_type = 'ndvi'
     # 5. classify the image
     answ = input('Do you want to classify the images (y/n)?: ')
     # answ = 'y'
     if answ == 'y':
-        # kmeans_classifiy(project, clusters, imageType, cropped)
+        print('')
+        # kmeans_cluster(project, clusters, image_type, cropped)
         # normalize_rgb_values(project, clusters, image_type, cropped)
-        normalized_kmeans(project, clusters, image_type, cropped)
+        # normalized_kmeans(project, clusters, image_type, cropped)
+        # gmm_cluster(project, clusters, image_type, cropped)
+        # dbscan_cluster(project, 5, 100, image_type, cropped)
         # plot_cost_function(project, 'ndvi')
 
     # 6. show classified image
