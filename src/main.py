@@ -1,15 +1,20 @@
 from projectManager import ProjectManager
 import rasterData
 from display import show_image, show_classification, convert_to_png
-from classification import kmeans_classifiy, plot_cost_function
+from classification import kmeans_classifiy, plot_cost_function, normalize_rgb_values
+from classification import normalized_kmeans
 
 
 def download_sample(project):
+    """
+    Downloads Sample Image for a given project
+    takes into consideration cloud coverage only
+    """
 
     footprint = project.get_footprint()
     catalog = project.get_catalog()
     # REMOVE LINKS WITH TOO MUCH CLOUD COVERAGE
-    catalog = catalog[catalog.cloudcoverpercentage < 1]
+    catalog = catalog[catalog.cloudcoverpercentage < 5]
     # REMOVE THOSE WHERE THE FOOTPRINT ISNT FULLY CONTAINED
     # MEANING WHERE THE AREA OF INTEREST ISN'T TOTALLY CONTAINED IN THE
     # SATELLITE IMAGE
@@ -26,10 +31,10 @@ def download_sample(project):
 def main():
 
     # 1. create project
-    projectName = 'montreal'
+    projectName = 'sanfrancisco'
     project = ProjectManager(projectName)
 
-    # 2. download data
+    # # 2. download data
     answ = input('Do you want to download the data (y/n)?: ')
     if answ == 'y':
         download_sample(project)
@@ -47,17 +52,22 @@ def main():
 
     # CLASSIFICATION
     clusters = 5
+    cropped = True
+    image_type = 'rgb'
     # 5. classify the image
     answ = input('Do you want to classify the images (y/n)?: ')
+    # answ = 'y'
     if answ == 'y':
-        kmeans_classifiy(project, clusters, 'ndvi', False)
+        # kmeans_classifiy(project, clusters, imageType, cropped)
+        # normalize_rgb_values(project, clusters, image_type, cropped)
+        normalized_kmeans(project, clusters, image_type, cropped)
         # plot_cost_function(project, 'ndvi')
 
     # 6. show classified image
     answ = input('Do you want to show the classified images (y/n)?: ')
     if answ == 'y':
-        convert_to_png(project, 'ndvi', False, True, clusters)
-        # show_classification(project, clusters, 'ndvi', False)
+        # convert_to_png(project, 'ndvi', False, True, clusters)
+        show_classification(project, clusters, imageType, cropped)
 
 
 if __name__ == "__main__":

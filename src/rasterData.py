@@ -42,8 +42,11 @@ def create_images(project):
 def crop_images(info, project, output):
 
     b02 = rasterio.open(info[0][0]['B02'])
-    proj_types = b02.crs
-    projection = project.create_projection(proj_types)
+    proj_type = b02.crs
+    # projection = project.create_projection(proj_type)
+    projection = project.get_bounding_box(proj_type)
+    print(projection.geometry)
+    print(type(projection.geometry))
     non_cropped_path = output
     output_path = path.join(output, 'cropped')
 

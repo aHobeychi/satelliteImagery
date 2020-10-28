@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 THREEBANDS = ['rgb', 'agri', 'bathy', 'swi', 'geo']
 
 BRIGHTNESS = {
-    'rgb': 8,
+    'rgb': 5,
     'agri': 3,
     'geo': 2,
 }

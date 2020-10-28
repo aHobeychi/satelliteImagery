@@ -152,7 +152,10 @@ class ProjectManager():
             os.mkdir(self.get_classification_folder_path() +
                      all_dates[int(selected)] + os. sep + 'cropped')
         else:
-            return False
+            answ = input('The image folder already exists do you want to continue(y/n)?:')
+            if answ == 'n':
+                return False
+
         if not os.path.exists(image_path + all_dates[int(selected)] +
                               os.sep + 'cropped'):
 
@@ -181,6 +184,14 @@ class ProjectManager():
         file_path = (self.projects_folder + os.sep + self.project_name +
                      os.sep + self.project_name + '.kml')
         return self.kml_handler.create_projection(projection_type, file_path)
+
+    def get_bounding_box(self, projection_type):
+        """
+        Returns bounding box around area of interest
+        """
+        file_path = (self.projects_folder + os.sep + self.project_name +
+                     os.sep + self.project_name + '.kml')
+        return self.kml_handler.create_bounding_box(projection_type, file_path)
 
     def get_image_paths(self, image_type, cropped=True):
         image_path = self.get_images_folder_path()

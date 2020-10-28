@@ -1,6 +1,7 @@
 import geopandas as gdp
 import fiona
 import geometryObject
+from shapely.geometry import box
 
 
 class KmlHandler():
@@ -19,26 +20,43 @@ class KmlHandler():
             return gdp.read_file(filepath)
 
     def create_projection(self, projection_type, file_path):
+        """
+        Creates Projection of the kml file so that it can be used as a polygon to crop
+        the raster Images
+        """
         return gdp.read_file(file_path).to_crs(projection_type)
+
+    def create_bounding_box(self, projection_type, file_path):
+        """
+        Creates a bounding box around the kml project so that the images can be cropped 
+        without the black boundaries
+        """
+        projection = self.create_projection(projection_type, file_path)
+        # projection.geometry return a dataframe, we want the first row of data
+        geometry =  projection.geometry.iloc[0]
+        from geopandas import GeoSeries
+        
+        return GeoSeries(box(*geometry.bounds))
+        
+
 
     def set_file_path(self, filepath):
         self.file_path = filepath
 
     def get_foot_print(self, filepath=False):
+        """returns a list from a polygon object.
+        """
 
         if filepath is False:
             return self.create_projection()
         else:
             return self.create_foot_print(filepath)
 
-        """returns a list from a polygon object.
-        """
-
-    """returns dictionnary containing all usefull information of the
-        given kml file
-    """
 
     def parse_kml(self, filepath):
+        """returns dictionnary containing all usefull information of the
+            given kml file
+        """
 
         information = {}
 
