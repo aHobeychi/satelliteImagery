@@ -10,6 +10,7 @@ import gdal
 import numpy as np
 import matplotlib.pyplot as plt
 import numpy
+from preprocessing import get_normalized_bands
 
 
 def plot_cost_function(project, image_type='allbands', cropped=True):
@@ -57,20 +58,6 @@ def get_raster_data(image_path, dtype=np.float32):
         return np.float64(data)
 
     data = np.float32(data)
-
-
-def get_normalized_bands(image_path, dtype=np.float32):
-    """
-    Return raster data as numpy array after normalizing with the standard
-    scaler
-    """
-
-    data = get_raster_data(image_path, dtype)
-    scaler = StandardScaler()
-    for band in range(data.shape[-1]):
-        data[:,band] = scaler.fit_transform(data[:,band].reshape(-1, 1)).reshape(-1)
-
-    return data
 
 
 def save_output_result(prediction, project, image_path, output_description, cropped):

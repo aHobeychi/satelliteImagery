@@ -3,33 +3,49 @@ Handles the project structure,
 creation of different project specific folder,
 unzipping the data and keeping track of the image paths
 """
-
 import os
 from shutil import copy, move
 from zipfile import ZipFile
 from kmlHandler import KmlHandler
 from apiSession import ApiSession
 from datetime import date
+import rasterData
 
+def get_project_list(self):
+    """
+    Returns a list of all projects.
+    """
+    sub_directories = os.listdir(self.projects_folder)
+    return [folder for folder in sub_directories if os.listdir(folder)]
 
 class ProjectManager():
-
+    """
+    ProjectManager creates project folder structure and helps with keeping
+    track of all needed paths and path specific operations directory paths
+    just by calling specific methods.
+    """
     def __init__(self, project_name=''):
         self.root_folder = os.path.normpath(os.getcwd() + os.sep + os.pardir)
         self.projects_folder = self.root_folder + os.sep + 'projects'
-        self.create_project_structure()
+        self.create_project_folder()
         self.project_name = ''
         if not project_name == '':
             self.add_project(project_name)
         self.kml_handler = KmlHandler()
         self.api_session = ApiSession()
 
-    def create_project_structure(self):
+    def create_project_folder(self):
+        """
+        Creates the project folder where all project will be stored.
+        """
         projects_folder = self.root_folder + os.sep + 'projects'
         if not os.path.exists(projects_folder):
             os.mkdir(projects_folder)
 
     def add_project(self, project_name):
+        """
+        Adds project to project folder and creates all necessary folders.
+        """
         self.project_name = project_name
         folder_path = self.projects_folder + os.sep + project_name
         data_path = folder_path + os.sep + 'data'
@@ -50,13 +66,22 @@ class ProjectManager():
         self.api_session = ApiSession()
 
     def set_project_name(self, project_name):
+        """
+        Sets project name.
+        """
         self.project_name = project_name
 
     def __get_project_list(self):
+        """
+        Returns a list of all projects.
+        """
         sub_directories = os.listdir(self.projects_folder)
         return (folder for folder in sub_directories if os.listdir(folder))
 
     def add_kml(self, p_name='null'):
+        """
+        Moves the kml file from the root kml folder to the project folder.
+        """
         kml_path = self.root_folder + os.sep + 'kmlFiles'
         kml_files = os.listdir(kml_path)
         desired_path = ''
@@ -76,18 +101,31 @@ class ProjectManager():
             print('no kml found')
 
     def get_download_path(self):
+        """
+        Returns the download folder path for the given project.
+        """
         return (self.projects_folder + os.sep +
                 self.project_name + os.sep + 'data' + os.sep)
 
     def get_images_folder_path(self):
+        """
+        Returns the images folder for the given project.
+        """
         return (self.projects_folder + os.sep +
                 self.project_name + os.sep + 'images' + os.sep)
 
     def get_classification_folder_path(self):
+        """
+        Returns the location of the classification folder for the given project.
+        """
         return (self.projects_folder + os.sep +
                 self.project_name + os.sep + 'classification' + os.sep)
 
     def unzip_downlaod(self):
+        """
+        Unzips downloaded data and moves it to a folder that indicates the
+        date, the data was registered.
+        """
         zipped_name = ''
         download_path = self.get_download_path()
         for current_file in os.listdir(download_path):
@@ -117,23 +155,97 @@ class ProjectManager():
                  download_path + formatted_date)
 
     def get_footprint(self):
+        """
+        Get geometric footprint from project kml file.
+        """
         kml_path = (self.projects_folder + os.sep +
                     self.project_name + os.sep + self.project_name + '.kml')
         return self.kml_handler.get_foot_print(kml_path)
 
     def get_catalog(self):
+        """
+        return sentinel data catalog for given footprint.
+        """
         footprint = self.get_footprint()
         query = self.api_session.query(footprint)
         return self.api_session.to_geo_df(query)
 
+
     def download_data(self, link):
-        """downloads the data from the specific link"""
+        """
+        downloads the data from the specific link.
+        """
         self.api_session.download(link, self.get_download_path())
         self.unzip_downlaod()
 
 
+    def create_imagery_folder(self, selected_file):
+        """
+        Creates the image and classification folder for the selected data of the data
+        """
+        image_path = self.get_images_folder_path()
+
+        if not os.path.exists(image_path + selected_file):
+            os.mkdir(image_path + selected_file)
+            os.mkdir(image_path + selected_file + os.sep + 'cropped')
+            os.mkdir(self.get_classification_folder_path() + selected_file
+                    + os. sep)
+            os.mkdir(self.get_classification_folder_path() + selected_file
+                    + os. sep + 'cropped')
+
+        if not os.path.exists(image_path + selected_file +
+                              os.sep + 'cropped'):
+
+            os.mkdir(image_path + selected_file + os.sep + 'cropped')
+
+
+    def batch_create_imagery(self):
+        """
+        Calls rasterData create_images for all data present for the given project.
+        """
+        data_path = self.get_download_path()
+        image_path = self.get_images_folder_path()
+        all_dates = os.listdir(data_path)
+
+        for data_file in all_dates:
+            tmp_info = self.__create_resolution_index(data_file)
+            rasterData.create_batch_images(tmp_info, self)
+            
+
+
+    def __create_resolution_index(self, selected_file):
+        """
+        Given a data location return a dictionary with all the necessary
+        information.
+        """
+        data_path = self.get_download_path()
+        image_path = self.get_images_folder_path()
+        self.create_imagery_folder(selected_file)
+
+
+        data_folder = data_path + selected_file + os.sep
+        granule_path = data_folder + 'GRANULE' + os.sep
+        granule_next = granule_path + os.listdir(granule_path)[0] + os.sep
+        final_folder = granule_next + 'IMG_DATA' + os.sep
+
+        references = []
+        resolutions = ['R10m', 'R20m', 'R60m']
+
+        for res in resolutions:
+            resolution_dict = {}
+            for data in os.listdir(final_folder + os.sep + res):
+                key = data.split('_')[2]
+                value = final_folder + res + os.sep + data
+                resolution_dict[key] = value
+
+            references.append(resolution_dict)
+
+        return (references, image_path + selected_file + os.sep)
+
     def get_resolution_paths(self):
-        """returns the path of the resolution from the data forlder"""
+        """
+        returns the path of the resolution from the data folder.
+        """
         data_path = self.get_download_path()
         image_path = self.get_images_folder_path()
         all_dates = os.listdir(data_path)
@@ -144,23 +256,7 @@ class ProjectManager():
 
         selected = input()
 
-        if not os.path.exists(image_path + all_dates[int(selected)]):
-            os.mkdir(image_path + all_dates[int(selected)])
-            os.mkdir(image_path + all_dates[int(selected)] + os.sep + 'cropped')
-            os.mkdir(self.get_classification_folder_path() +
-                     all_dates[int(selected)] + os. sep)
-            os.mkdir(self.get_classification_folder_path() +
-                     all_dates[int(selected)] + os. sep + 'cropped')
-        else:
-            answ = input('The image folder already exists do you want to continue(y/n)?:')
-            if answ == 'n':
-                return False
-
-        if not os.path.exists(image_path + all_dates[int(selected)] +
-                              os.sep + 'cropped'):
-
-            os.mkdir(image_path + all_dates[int(selected)]
-                     + os.sep + 'cropped')
+        self.create_imagery_folder(all_dates[int(selected)])
 
         data_folder = data_path + all_dates[int(selected)] + os.sep
         granule_path = data_folder + 'GRANULE' + os.sep
@@ -181,19 +277,26 @@ class ProjectManager():
         return (references, image_path + all_dates[int(selected)] + os.sep)
 
     def create_projection(self, projection_type):
+        """
+        Creates and returns projection from the geometric footprint for the project
+        with a specific projection type.
+        """
         file_path = (self.projects_folder + os.sep + self.project_name +
                      os.sep + self.project_name + '.kml')
         return self.kml_handler.create_projection(projection_type, file_path)
 
     def get_bounding_box(self, projection_type):
         """
-        Returns bounding box around area of interest
+        Returns bounding box around area of interest.
         """
         file_path = (self.projects_folder + os.sep + self.project_name +
                      os.sep + self.project_name + '.kml')
         return self.kml_handler.create_bounding_box(projection_type, file_path)
 
     def get_image_paths(self, image_type, cropped=True):
+        """
+        Returns all the image paths and ask you what path youre looking for.
+        """
         image_path = self.get_images_folder_path()
         all_dates = os.listdir(image_path)
         print('Select one of the dates to view the Images:')
@@ -212,6 +315,10 @@ class ProjectManager():
                 return path + os.sep + files
 
     def get_classification_path(self, image_type, n_clusters, cropped=True):
+        """
+        Return the classfication result path after asking which one 
+        your interested in.
+        """
         classification_path = self.get_classification_folder_path()
         all_dates = os.listdir(classification_path)
 
@@ -233,4 +340,3 @@ class ProjectManager():
             if image_type in files.lower():
                 if str(n_clusters) in files:
                     return final_folder + os.sep + files
-

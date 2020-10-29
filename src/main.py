@@ -31,7 +31,7 @@ def download_sample(project):
 def main():
 
     # 1. create project
-    projectName = 'fuji'
+    projectName = 'kilimanjaro'
     project = ProjectManager(projectName)
 
     # # 2. download data
@@ -42,7 +42,12 @@ def main():
     # 3. create images
     answ = input('Do you want to create the images (y/n)?: ')
     if answ == 'y':
+        answ = input('Batch create(y/n)?: ')
+        if answ == 'y':
+            project.batch_create_imagery()
+
         rasterData.create_images(project)
+
 
     # 4. display the image
     answ = input('Do you want to display the images (y/n)?: ')

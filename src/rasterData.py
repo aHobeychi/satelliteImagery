@@ -10,6 +10,16 @@ import numpy as np
 import rasterio
 import rasterio.mask
 
+def create_batch_images(index, project):
+    """
+    Loops through all available information to create imagery
+    """
+    output = index[1]
+    create_rgb(index, project, output)
+    create_ndvi(index, project, output)
+    create_ndbi(index, project, output)
+    crop_images(index, project, output)
+
 
 def create_images(project):
     """creates all desired images"""
