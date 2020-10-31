@@ -9,7 +9,7 @@ from zipfile import ZipFile
 from kmlHandler import KmlHandler
 from apiSession import ApiSession
 from datetime import date
-import rasterData
+import ImageCreator
 
 def get_project_list(self):
     """
@@ -209,7 +209,7 @@ class ProjectManager():
 
         for data_file in all_dates:
             tmp_info = self.__create_resolution_index(data_file)
-            rasterData.create_batch_images(tmp_info, self)
+            ImageCreator.create_batch_images(tmp_info, self)
             
 
 

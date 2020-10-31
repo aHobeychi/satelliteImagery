@@ -5,7 +5,9 @@ from shapely.geometry import box
 
 
 class KmlHandler():
-
+    """
+    Handles all kml file operations.
+    """
     def __init__(self, filepath=False):
         fiona.supported_drivers['kml'] = 'rw'
         fiona.supported_drivers['KML'] = 'rw'
@@ -14,6 +16,9 @@ class KmlHandler():
             self.filepath = filepath
 
     def get_geo_pandas(self, filepath=False):
+        """
+        Get Geopanda from kml file.
+        """
         if filepath is False:
             return gdp.read_file(self.filepath)
         else:
@@ -41,6 +46,9 @@ class KmlHandler():
 
 
     def set_file_path(self, filepath):
+        """
+        Set kml file path for current KmlHandler object.
+        """
         self.file_path = filepath
 
     def get_foot_print(self, filepath=False):
@@ -78,6 +86,9 @@ class KmlHandler():
         return information
 
     def create_foot_print(self, filepath=False):
+        """
+        Creates footprint from kml file and return it
+        """
 
         if filepath is False:
             parsed_kml = self.parseKml(self.filepath)

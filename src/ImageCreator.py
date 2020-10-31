@@ -1,5 +1,5 @@
 """
-raster data creates the imagery from the different spectral band
+Image Creates handles the creation the imagery from the different spectral band
 info about the band can be found at:
 https://gisgeography.com/sentinel-2-bands-combinations/
 https://www.satimagingcorp.com/satellite-sensors/other-satellite-sensors/sentinel-2a/
@@ -240,3 +240,53 @@ def create_all_bands(info, project, output):
         for ids, layer in enumerate(addresses, start=1):
             with rasterio.open(layer) as src1:
                 dst.write_band(ids, src1.read(1).astype('uint16'))
+
+
+def __convert_three_bands(file_path, image_type):
+    """
+    Used internaly to help with saving to png
+    """
+    src = rasterio.open(file_path)
+    data = src.read()
+    stack1 = __normalize_array(data[0], image_type)
+    stack2 = __normalize_array(data[1], image_type)
+    stack3 = __normalize_array(data[2], image_type)
+    normedd = np.dstack((stack1, stack2, stack3))
+    plt.imshow(normedd)
+    output = file_path.replace('tiff', 'png')
+    plt.axis('off')
+    plt.savefig(output, dpi=2000, bbox_inches='tight', pad_inches=0)
+
+
+def convert_to_png(project, image_type, cropped=True, classification=False,
+                   clusters=0):
+    """
+    Converts tiff image to png and saves it
+    """
+    if not classification:
+        filepath = project.getImagePath(image_type, cropped)
+
+        if path.exists(filepath.replace('tiff', 'png')):
+            return
+
+        if image_type.lower() in THREEBANDS:
+            __convert_three_bands(filepath, image_type)
+            return
+
+        src = rasterio.open(filepath)
+        data = src.read()
+        plt.imshow(data[0], cmap='RdYlGn')
+        output = filepath.replace('tiff', 'png')
+        plt.axis('off')
+        plt.savefig(output, dpi=1000, bbox_inches='tight', pad_inches=0)
+
+    if classification:
+        filepath = project.get_classification_path(image_type,
+                                                   clusters, cropped)
+        output = filepath.replace('tiff', 'png')
+        img = rasterio.open(filepath)
+
+        data = img.read()
+        plt.imshow(data[0], cmap='RdYlGn')
+        plt.axis('off')
+        plt.savefig(output, dpi=1000, bbox_inches='tight', pad_inches=0)

@@ -1,6 +1,6 @@
 from projectManager import ProjectManager
-import rasterData
-from display import show_image, show_classification, convert_to_png
+import ImageCreator
+from display import show_image, show_classification
 from classification import kmeans_cluster, plot_cost_function
 from classification import dbscan_cluster, gmm_cluster
 
@@ -31,7 +31,8 @@ def download_sample(project):
 def main():
 
     # 1. create project
-    projectName = 'kilimanjaro'
+    # projectName = 'kilimanjaro'
+    projectName = 'fire'
     project = ProjectManager(projectName)
 
     # # 2. download data
@@ -45,15 +46,14 @@ def main():
         answ = input('Batch create(y/n)?: ')
         if answ == 'y':
             project.batch_create_imagery()
-
-        rasterData.create_images(project)
+        else:
+            ImageCreator.create_images(project)
 
 
     # 4. display the image
     answ = input('Do you want to display the images (y/n)?: ')
     if answ == 'y':
         show_image(project, 'rgb', cropped = False)
-        # convert_to_png(project, 'rgb', cropped=False)
 
     # CLASSIFICATION
     clusters = 2
@@ -64,7 +64,7 @@ def main():
     # answ = 'y'
     if answ == 'y':
         print('')
-        # kmeans_cluster(project, clusters, image_type, cropped)
+        kmeans_cluster(project, clusters, image_type, cropped)
         # normalize_rgb_values(project, clusters, image_type, cropped)
         # normalized_kmeans(project, clusters, image_type, cropped)
         # gmm_cluster(project, clusters, image_type, cropped)
@@ -75,7 +75,7 @@ def main():
     answ = input('Do you want to show the classified images (y/n)?: ')
     if answ == 'y':
         # convert_to_png(project, 'ndvi', False, True, clusters)
-        show_classification(project, clusters, imageType, cropped)
+        show_classification(project, clusters, image_type, cropped)
 
 
 if __name__ == "__main__":

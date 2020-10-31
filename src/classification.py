@@ -3,6 +3,7 @@ CLASSIFICATION FILE, USED TO ADD CLUSTERING TO IMAGES
 """
 
 import os
+from RasterData import RasterData
 from sklearn.cluster import KMeans, DBSCAN
 from sklearn.mixture import GaussianMixture
 from sklearn.preprocessing import StandardScaler
@@ -40,26 +41,6 @@ def plot_cost_function(project, image_type='allbands', cropped=True):
     plt.show()
 
 
-def get_raster_data(image_path, dtype=np.float32):
-    """
-    Return raster data as a numpy array
-    """
-    raster_data = gdal.Open(image_path)
-    nbands = raster_data.RasterCount
-    data = np.empty((raster_data.RasterXSize*raster_data.RasterYSize, nbands))
-
-    for i in range(1, nbands+1):
-        band = raster_data.GetRasterBand(i).ReadAsArray()
-        data[:, i-1] = band.flatten()
- 
-    if (dtype == np.float32):
-        return np.float32(data)
-    else:
-        return np.float64(data)
-
-    data = np.float32(data)
-
-
 def save_output_result(prediction, project, image_path, output_description, cropped):
     """
     Saves The clustering result to a new image
@@ -95,21 +76,21 @@ def kmeans_cluster(project, clusters, image_type='allbands',
     """
     Clusters geotiff image using kmeans
     """
-    image_path = project.get_image_paths(image_type, cropped)
-    tiff_driver = gdal.GetDriverByName('GTiff')
 
-    data = 0
+    image_path = project.get_image_paths(image_type, cropped)
+    data = RasterData(image_path)
+
     output_path = ''
     if normalized:
-        data = get_normalized_bands(image_path)
+        data.standard_normalize_array(inplace=True)
+        data.gaussian_blur_array(2)
         output_path = '{}_normalized_kmeans_{}.tiff'.format(clusters, image_type)
     else:
-        data = get_raster_data(image_path)
         output_path = '{}_kmeans_{}.tiff'.format(clusters, image_type)
 
 
     km = KMeans(n_clusters=clusters)
-    prediction = km.fit_predict(data)
+    prediction = km.fit_predict(data.flatten_array())
     save_output_result(prediction, project, image_path, output_path, cropped)
 
 

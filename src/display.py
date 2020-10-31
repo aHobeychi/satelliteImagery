@@ -17,52 +17,10 @@ BRIGHTNESS = {
 }
 
 
-def convert_to_png(project, image_type, cropped=True, classification=False,
-                   clusters=0):
-
-    if not classification:
-        filepath = project.getImagePath(image_type, cropped)
-
-        if path.exists(filepath.replace('tiff', 'png')):
-            return
-
-        if image_type.lower() in THREEBANDS:
-            __convert_three_bands(filepath, image_type)
-            return
-
-        src = rasterio.open(filepath)
-        data = src.read()
-        plt.imshow(data[0], cmap='RdYlGn')
-        output = filepath.replace('tiff', 'png')
-        plt.axis('off')
-        plt.savefig(output, dpi=1000, bbox_inches='tight', pad_inches=0)
-
-    if classification:
-        filepath = project.get_classification_path(image_type,
-                                                   clusters, cropped)
-        output = filepath.replace('tiff', 'png')
-        img = rasterio.open(filepath)
-
-        data = img.read()
-        plt.imshow(data[0], cmap='RdYlGn')
-        plt.axis('off')
-        plt.savefig(output, dpi=1000, bbox_inches='tight', pad_inches=0)
-
-
-def __convert_three_bands(file_path, image_type):
-    src = rasterio.open(file_path)
-    data = src.read()
-    stack1 = __normalize_array(data[0], image_type)
-    stack2 = __normalize_array(data[1], image_type)
-    stack3 = __normalize_array(data[2], image_type)
-    normedd = np.dstack((stack1, stack2, stack3))
-    plt.imshow(normedd)
-    output = file_path.replace('tiff', 'png')
-    plt.axis('off')
-    plt.savefig(output, dpi=2000, bbox_inches='tight', pad_inches=0)
-
-
 def show_image(project, image_type, cropped=True):
+    """
+    Plots Raster Image using matplotlib
+    """
     filepath = project.get_image_paths(image_type, cropped)
     if image_type.lower() in THREEBANDS:
         __show_three_bands(filepath, image_type)
@@ -74,7 +32,9 @@ def show_image(project, image_type, cropped=True):
 
 def show_classification(project, clusters, image_type='allbands',
                         cropped=True):
-
+    """
+    Plots Classification Result
+    """
     filepath = project.get_classification_path(image_type, clusters, cropped)
     img = rasterio.open(filepath)
     rasterio.plot.show(img,
@@ -83,6 +43,9 @@ def show_classification(project, clusters, image_type='allbands',
 
 
 def __show_three_bands(file_path, image_type):
+    """
+    Used within the file to help with plotting real color imagery
+    """
     src = rasterio.open(file_path)
     data = src.read()
     stack1 = __normalize_array(data[0], image_type)
