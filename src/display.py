@@ -52,7 +52,7 @@ def __show_three_bands(file_path, image_type):
     stack2 = __normalize_array(data[1], image_type)
     stack3 = __normalize_array(data[2], image_type)
     normed = np.dstack((stack1, stack2, stack3))
-    plt.imshow(np.clip(normed, 0,1))
+    plt.imshow(np.clip(normed, 0, 1))
     plt.show()
 
 

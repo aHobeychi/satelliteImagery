@@ -1,5 +1,5 @@
-from projectManager import ProjectManager
-import ImageCreator
+from project_manager import ProjectManager
+import image_creator
 from display import show_image, show_classification
 from classification import kmeans_cluster, plot_cost_function
 from classification import dbscan_cluster, gmm_cluster
@@ -32,7 +32,7 @@ def main():
 
     # 1. create project
     # projectName = 'kilimanjaro'
-    projectName = 'fire'
+    projectName = 'montreal'
     project = ProjectManager(projectName)
 
     # # 2. download data
@@ -47,13 +47,12 @@ def main():
         if answ == 'y':
             project.batch_create_imagery()
         else:
-            ImageCreator.create_images(project)
-
+            image_creator.create_images(project)
 
     # 4. display the image
     answ = input('Do you want to display the images (y/n)?: ')
     if answ == 'y':
-        show_image(project, 'rgb', cropped = False)
+        show_image(project, 'rgb', cropped=False)
 
     # CLASSIFICATION
     clusters = 2

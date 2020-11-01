@@ -11,17 +11,12 @@ Project that uses Sentinel-2 satellite to download and classify spatial imagery
 │   ├── sanfrancisco.kml  
 ├── projects  
 │   ├── montreal  
-│   │   ├── classfication  
-│   │   ├── data  
-│   │   │   └── 2019_09_18  
-│   │   ├── images  
-│   │   │   └── cropped  
-│   │   └── montreal.kml  
-│   └── sanfrancisco  
-│       ├── classfication  
-│       ├── data  
-│       │   └── 2019_10_22  
-│       └── sanfrancisco.kml  
+│       ├── classfication  
+│       ├── data  
+│       │   └── 2019_09_18  
+│       ├── images  
+│       │   └── cropped  
+│       └── montreal.kml  
 ├── README.md  
 ├── ressources  
 │   ├── apiKeyTemplate.txt  
@@ -72,10 +67,10 @@ ____
 <br/>
 
 ### Uncropped Image
-<img src="assets/sanfrancisco.png" alt="alt text" width="700" height="500">
+<img src="assets/sanFranciscoRGB_Uncropped.png" alt="alt text" width="700" height="500">
 
 ### Cropped Image
-<img src="assets/sanFranciscoRGB_Cropped.png" alt="alt text" width="700" height="500">
+<img src="assets/sanfrancisco.png" alt="alt text" width="700" height="500">
 
 ### Kmeans Classification using k=4
 <img src="assets/Figure_1.png" alt="alt text" width="700" height="500">

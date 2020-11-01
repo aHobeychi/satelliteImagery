@@ -3,15 +3,14 @@ CLASSIFICATION FILE, USED TO ADD CLUSTERING TO IMAGES
 """
 
 import os
-from RasterData import RasterData
+import numpy as np
+from raster_data import RasterData
 from sklearn.cluster import KMeans, DBSCAN
 from sklearn.mixture import GaussianMixture
-from sklearn.preprocessing import StandardScaler
-import gdal
-import numpy as np
 import matplotlib.pyplot as plt
 import numpy
 from preprocessing import get_normalized_bands
+import gdal
 
 
 def plot_cost_function(project, image_type='allbands', cropped=True):
