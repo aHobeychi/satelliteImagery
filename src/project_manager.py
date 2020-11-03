@@ -125,7 +125,7 @@ class ProjectManager():
         return (self.projects_folder + os.sep +
                 self.project_name + os.sep + 'classification' + os.sep)
 
-    def unzip_downlaod(self):
+    def unzip_download(self):
         """
         Unzips downloaded data and moves it to a folder that indicates the
         date, the data was registered.

@@ -36,6 +36,7 @@ def show_classification(project, clusters, image_type='allbands',
     Plots Classification Result
     """
     filepath = project.get_classification_path(image_type, clusters, cropped)
+    print(filepath)
     img = rasterio.open(filepath)
     rasterio.plot.show(img,
                        title='{} with {} clusters'.format(
