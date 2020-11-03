@@ -36,10 +36,10 @@ def create_images(project):
     create_ndvi(info, project, output)
     create_ndbi(info, project, output)
     # create_all_bands(info, project, output)
-    # create_agri(info, project, output)
-    # create_bathy(info, project, output)
-    # create_geo(info, project, output)
-    # create_swi(info, project, output)
+    create_agri(info, project, output)
+    create_bathy(info, project, output)
+    create_geo(info, project, output)
+    create_swi(info, project, output)
 
     crop_images(info, project, output)
 

@@ -52,7 +52,9 @@ class ProjectManager():
         data_path = folder_path + os.sep + 'data'
         images_path = folder_path + os.sep + 'images'
         classification_path = folder_path + os.sep + 'classification'
-        self.kml_handler.file_path = folder_path + os.sep + '{}.kml'.format(project_name)
+        self.kml_handler.file_path = (
+            folder_path + os.sep + '{}.kml'.format(project_name)
+        )
 
         if os.path.exists(folder_path):
             print('project already exists')

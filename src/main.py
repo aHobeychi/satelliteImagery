@@ -32,7 +32,7 @@ def main():
 
     # 1. create project
     # projectName = 'kilimanjaro'
-    projectName = 'montreal'
+    projectName = 'phoenix'
     project = ProjectManager(projectName)
 
     # # 2. download data
