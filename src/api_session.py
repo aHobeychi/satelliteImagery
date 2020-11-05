@@ -67,3 +67,30 @@ class ApiSession():
         """
         self.api.download(
             link, directory_path=directory)
+
+    def query_to_dataframe(self, footprint, output_path, contains=True):
+        """
+        Saves the queried geopandas to a csv file so that it could be 
+        used in the future.
+        contains: if true will only save the links that fully contain the 
+            footprint
+        """
+        catalog = self.query(footprint)
+        catalog = self.to_geo_df(catalog)
+        desired_columns = [
+            'summary', 'vegetationpercentage', 'notvegetatedpercentage',
+            'waterpercentage','unclassifiedpercentage', 'snowicepercentage',
+            'cloudcoverpercentage', 'geometry'
+        ]
+        filtered_catalog = catalog[desired_columns]
+        if (contains):
+            contains = [footprint.within(geometry) for 
+                                    geometry in catalog['geometry']]
+            filtered_catalog = filtered_catalog[contains]
+
+        output = filtered_catalog.to_csv()
+        output_file = open(output_path, 'w')
+        output_file.write(output)
+        output_file.close()
+
+

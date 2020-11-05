@@ -171,13 +171,22 @@ class ProjectManager():
         footprint = self.get_footprint()
         query = self.api_session.query(footprint)
         return self.api_session.to_geo_df(query)
+    
+    def save_catalog(self, contains=True):
+        """
+        Saves the Queried catalog to a csv file in the project directory
+        """
+        footprint = self.get_footprint()
+        project_path = (self.projects_folder + os.sep + self.project_name + os.sep +
+                       self.project_name + '.csv')
+        self.api_session.query_to_dataframe(footprint, project_path, contains)
 
     def download_data(self, link):
         """
         downloads the data from the specific link.
         """
         self.api_session.download(link, self.get_download_path())
-        self.unzip_downlaod()
+        self.unzip_download()
 
     def create_imagery_folder(self, selected_file):
         """
@@ -314,7 +323,7 @@ class ProjectManager():
         print('No Imagery subjects found')
         return None
 
-    def get_classification_path(self, image_type, n_clusters, cropped=True):
+    def get_classification_path(self, cropped=True):
         """
         Return the classfication result path after asking which one
         your interested in.
@@ -330,16 +339,19 @@ class ProjectManager():
         selected = input()
         selection = all_dates[int(selected)]
 
-        final_folder = ''
+        selection_path = classification_path + selection + os.sep
         if cropped:
-            final_folder = classification_path + selection + os.sep + 'cropped'
-        else:
-            final_folder = classification_path + selection
+            selection_path += 'cropped' + os.sep
+    
+        all_results = os.listdir(selection_path)
 
-        for files in os.listdir(final_folder):
-            if image_type in files.lower():
-                if str(n_clusters) in files:
-                    return final_folder + os.sep + files
+        print('Select one of the images to view')
 
-        print('No Classification subjects found')
-        return None
+        for num, date in enumerate(all_results):
+            print('({}): {}'.format(num, date))
+
+        selected = input()
+        selection = all_results[int(selected)]
+
+        final_path = selection_path + selection
+        return final_path

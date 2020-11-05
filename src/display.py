@@ -2,7 +2,7 @@
 DISPLAY SATELLITE IMAGERY AND CLASSIFICATION RESULTS
 """
 
-from os import path
+import os
 import numpy as np
 import rasterio
 from rasterio.plot import show
@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 THREEBANDS = ['rgb', 'agri', 'bathy', 'swi', 'geo']
 
 BRIGHTNESS = {
-    'rgb': 1,
+    'rgb': 8,
     'agri': 3,
     'geo': 2,
 }
@@ -30,17 +30,14 @@ def show_image(project, image_type, cropped=True):
     rasterio.plot.show(img, title=image_type, map='RdYlGn', vmin=-1, vmax=1)
 
 
-def show_classification(project, clusters, image_type='allbands',
-                        cropped=True):
+def show_classification(project, cropped=True):
     """
     Plots Classification Result
     """
-    filepath = project.get_classification_path(image_type, clusters, cropped)
-    print(filepath)
+    filepath = project.get_classification_path(cropped)
+    title = filepath.split(os.sep)[-1].split('.')[0]
     img = rasterio.open(filepath)
-    rasterio.plot.show(img,
-                       title='{} with {} clusters'.format(
-                           image_type, clusters))
+    rasterio.plot.show(img, title=title)
 
 
 def __show_three_bands(file_path, image_type):
