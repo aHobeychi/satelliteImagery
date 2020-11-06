@@ -1,6 +1,9 @@
+"""
+Main file, Where the Program takes shape.
+"""
 from project_manager import ProjectManager
 import image_creator
-from display import show_image, show_classification
+from display import show_image, show_classification, show_grid_results
 from classification import kmeans_cluster, plot_cost_function
 from classification import dbscan_cluster, gmm_cluster
 
@@ -24,24 +27,29 @@ def download_sample(project):
     catalog = catalog[contained].sort_values(
         by=['cloudcoverpercentage'], ascending=[True])
 
-    toDownload = catalog.index.values[0]
-    project.download_data(toDownload)
+    to_download = catalog.index.values[0]
+    project.download_data(to_download)
 
 
 def main():
+    """
+    Main Method, used to test program
+    """
 
     # 1. create project
     # projectName = 'kilimanjaro'
-    projectName = 'montreal'
-    project = ProjectManager(projectName)
+    project_name = 'montreal'
+    project = ProjectManager(project_name)
 
+    # show_grid_results(project)
     # 3. create images
     answ = input('Do you want to create the images (y/n)?: ')
     if answ == 'y':
         answ = input('Batch create(y/n)?: ')
         if answ == 'y':
             project.batch_create_imagery()
-        else: image_creator.create_images(project)
+        else:
+            image_creator.create_images(project)
 
     # 4. display the image
     answ = input('Do you want to display the images (y/n)?: ')
@@ -49,23 +57,24 @@ def main():
         show_image(project, 'rgb', cropped=False)
 
     # CLASSIFICATION
-    clusters = 5
+    clusters = 4
     cropped = True
-    image_type = 'ndvi'
+    image_type = 'rgb'
     # 5. classify the image
     answ = input('Do you want to classify the images (y/n)?: ')
     # answ = 'y'
     if answ == 'y':
         kmeans_cluster(project, clusters, image_type, cropped)
-        # gmm_cluster(project, clusters, image_type, cropped)
+        gmm_cluster(project, clusters, image_type, cropped)
         # dbscan_cluster(project, 5, 100, image_type, cropped)
-        # plot_cost_function(project, 'ndvi')
+        plot_cost_function(project, 'ndvi')
 
     # 6. show classified image
     answ = input('Do you want to show the classified images (y/n)?: ')
     if answ == 'y':
         # convert_to_png(project, 'ndvi', False, True, clusters)
         show_classification(project, cropped)
+        show_grid_results(project)
 
 
 if __name__ == "__main__":

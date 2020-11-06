@@ -3,35 +3,38 @@ CLASSIFICATION FILE, USED TO ADD CLUSTERING TO IMAGES
 """
 
 import os
-import numpy as np
-from raster_data import RasterData
 from sklearn.cluster import KMeans, DBSCAN
 from sklearn.mixture import GaussianMixture
 import matplotlib.pyplot as plt
-import numpy
-from preprocessing import get_normalized_bands
 import gdal
+from raster_data import RasterData
+from logger import Logger
 
 
-def plot_cost_function(project, image_type='allbands', cropped=True):
+def plot_cost_function(project, image_type='allbands',
+                       cropped=True, normalized=True):
     """
     plots the cost function for different numbers of clusters
     """
+    log = Logger()
 
-    image_path = project.get_image_paths(image_type, cropped)
-    raster_data = gdal.Open(image_path)
-    nbands = raster_data.RasterCount
-    data = np.empty((raster_data.RasterXSize*raster_data.RasterYSize, nbands))
-
-    for i in range(1, nbands+1):
-        band = raster_data.GetRasterBand(i).ReadAsArray()
-        data[:, i-1] = band.flatten()
+    image_path, date = project.get_image_paths(image_type,
+                                               cropped, get_date=True)
+    data = RasterData(image_path)
+    if normalized:
+        data.standard_normalize_array(inplace=True)
 
     kval = range(2, 15)
-    cost = [KMeans(n_clusters=k, random_state=1).fit(data).inertia_
-            for k in kval]
+    costs = []
+    for k in kval:
+        cost = KMeans(n_clusters=k,
+                      random_state=1).fit(data.flatten_array()).inertia_
+        costs.append(cost)
+        log.log(project.project_name, date, image_type, k, cropped, normalized,
+                'kmeans', cost)
+        log.push_information()
 
-    plt.plot(kval, cost)
+    plt.plot(kval, costs)
     plt.xticks(kval)
     plt.title('K-means cost across K using {} image'.format
               (image_type))
@@ -40,7 +43,8 @@ def plot_cost_function(project, image_type='allbands', cropped=True):
     plt.show()
 
 
-def save_output_result(prediction, project, image_path, output_description, cropped):
+def save_output_result(prediction, project, image_path,
+                       output_description, cropped):
     """
     Saves The clustering result to a new image
     """
@@ -55,7 +59,6 @@ def save_output_result(prediction, project, image_path, output_description, crop
         date = image_path.split(os.sep)[-3]
         output_path = (project.get_classification_folder_path() + date +
                        os.sep + 'cropped' + os.sep + output_description)
-                       
     else:
         date = image_path.split(os.sep)[-2]
         output_path = (project.get_classification_folder_path() + date +
@@ -76,20 +79,25 @@ def kmeans_cluster(project, clusters, image_type='allbands',
     Clusters geotiff image using kmeans
     """
 
-    image_path = project.get_image_paths(image_type, cropped)
+    log = Logger()
+    image_path, date = project.get_image_paths(image_type,
+                                               cropped, get_date=True)
     data = RasterData(image_path)
 
     output_path = ''
     if normalized:
         data.standard_normalize_array(inplace=True)
         data.gaussian_blur_array(2)
-        output_path = '{}_normalized_kmeans_{}.tiff'.format(clusters, image_type)
+        output_path = '{}_normalized_kmeans_{}.tiff'.format(clusters,
+                                                            image_type)
     else:
         output_path = '{}_kmeans_{}.tiff'.format(clusters, image_type)
 
-
-    km = KMeans(n_clusters=clusters)
-    prediction = km.fit_predict(data.flatten_array())
+    kmeans_model = KMeans(n_clusters=clusters)
+    prediction = kmeans_model.fit_predict(data.flatten_array())
+    log.log(project.project_name, date, image_type, clusters, cropped,
+            normalized, 'kmeans', kmeans_model.inertia_)
+    log.push_information()
     save_output_result(prediction, project, image_path, output_path, cropped)
 
 
@@ -98,34 +106,50 @@ def gmm_cluster(project, components, image_type='allbands',
     """
     Clusters raster data using Gaussian Mixture Models
     """
-    image_path = project.get_image_paths(image_type, cropped)
-    tiff_driver = gdal.GetDriverByName('GTiff')
-    data = 0
+    image_path, date = project.get_image_paths(image_type,
+                                               cropped, get_date=True)
+    data = RasterData(image_path)
+    log = Logger()
+
     output_path = ''
     if normalized:
-        data = get_normalized_bands(image_path)
-        output_path = '{}_normalized_gmm_{}.tiff'.format(components, image_type)
+        data.standard_normalize_array(inplace=True)
+        output_path = '{}_normalized_gmm_{}.tiff'.format(components,
+                                                         image_type)
     else:
-        data = get_raster_data(image_path)
         output_path = '{}_gmm_{}.tiff'.format(components, image_type)
 
-    gmm = GaussianMixture(n_components = components)
-    prediction = gmm.fit_predict(data)
-
+    gmm = GaussianMixture(n_components=components)
+    prediction = gmm.fit_predict(data.flatten_array())
     save_output_result(prediction, project, image_path, output_path, cropped)
 
- 
-def dbscan_cluster(project, min_samples=3, eps=100, image_type='allbands',
+    cost = {
+            "AIC": gmm.aic(data.flatten_array()),
+            "BIC": gmm.bic(data.flatten_array())
+    }
+    log.log(project.project_name, date, image_type, components, cropped,
+            normalized, 'gmm', cost)
+    log.push_information()
+
+
+def dbscan_cluster(project, min_samples=3, eps=100, image_type='rgb',
                    cropped=True, normalized=True):
     """
     Clusters raster data using Dbscan model
     """
     image_path = project.get_image_paths(image_type, cropped)
-    tiff_driver = gdal.GetDriverByName('GTiff')
-    data = get_raster_data(image_path)
+    data = RasterData(image_path)
 
-    dbscan = DBSCAN(min_samples= min_samples, eps=100)
-    prediction = dbscan.fit_predict(data)
+    output_path = ''
+    if normalized:
+        data.standard_normalize_array(inplace=True)
+        data.gaussian_blur_array(2)
+        output_path = '{}_normalized_dbscan_{}_{}.tiff'.format(eps, min_samples,
+                                                               image_type)
+    else:
+        output_path = '{}_dbscan_{}_{}.tiff'.format(eps, min_samples,
+                                                    image_type)
 
-    save_output_result(prediction,  project, image_path,
-            '{}_{}_{}_dbscan_{}.tiff'.format(min_points,eps, image_type), cropped)
+    dbscan = DBSCAN(min_samples=min_samples, eps=100)
+    prediction = dbscan.fit_predict(data.flatten_array())
+    save_output_result(prediction, project, image_path, output_path, cropped)

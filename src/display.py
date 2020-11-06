@@ -6,12 +6,13 @@ import os
 import numpy as np
 import rasterio
 from rasterio.plot import show
+from raster_data import RasterData
 import matplotlib.pyplot as plt
 
 THREEBANDS = ['rgb', 'agri', 'bathy', 'swi', 'geo']
 
 BRIGHTNESS = {
-    'rgb': 8,
+    'rgb': 5,
     'agri': 3,
     'geo': 2,
 }
@@ -38,6 +39,69 @@ def show_classification(project, cropped=True):
     title = filepath.split(os.sep)[-1].split('.')[0]
     img = rasterio.open(filepath)
     rasterio.plot.show(img, title=title)
+
+
+grid_options = {
+        # The format is as follows 1. image type, 2. Cropped
+        'plot1': ['rgb', True],
+        # plot, type, number of clusters
+        'plot2': ['kmeans', True, 4],
+        'plot3': ['gmm', True, 4]
+}
+
+
+def show_grid_results(project):
+    """
+    Plots Mutipleplots side by side Typically (1x3), first being rgb, second
+    being classification result 1 and third being classification result 2
+    """
+    date = project.get_possible_dates()
+    image_path = project.find_image(date, 'rgb')
+    original_image = RasterData(image_path)
+    normed = __normalize_array(original_image.array, 'rgb')
+
+    plt.close('all')
+    ax1 = plt.subplot(121)
+    ax1.imshow(normed)
+    ax1.set_xticklabels([])
+    ax1.set_yticklabels([])
+    ax1.set_aspect('equal')
+    ax1.margins(0, 0)
+    ax1.set_title('{} Image'.format(grid_options['plot1'][0].upper()))
+
+    ax2 = plt.subplot(222)
+    ax2.imshow(get_result_plot(project, date, *grid_options['plot2']))
+    ax2.set_xticklabels([])
+    ax2.set_yticklabels([])
+    ax2.set_aspect('equal')
+    ax2.margins(0, 0)
+    ax2.set_title('{} with {} clusters'.format(
+                  grid_options['plot2'][0].upper(), grid_options['plot2'][-1]))
+
+    ax3 = plt.subplot(224)
+    ax3.imshow(get_result_plot(project, date, *grid_options['plot3']))
+    ax3.set_title(grid_options['plot3'][0])
+    ax3.set_xticklabels([])
+    ax3.set_yticklabels([])
+    ax3.set_aspect('equal')
+    ax3.margins(0, 0)
+    ax3.set_title('{} with {} clusters'.format(
+                  grid_options['plot3'][0].upper(), grid_options['plot3'][-1]))
+
+    plt.tight_layout()
+    plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, hspace=None)
+
+    plt.show()
+
+
+def get_result_plot(project, date, plot_type, cropped, n_clusters):
+    """
+    Returns axes of a plot, for a given clustering result
+    """
+    path = project.find_classification_path(date, plot_type,
+                                            n_clusters, cropped)
+    image = RasterData(path)
+    return image.array
 
 
 def __show_three_bands(file_path, image_type):

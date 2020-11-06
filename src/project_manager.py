@@ -10,6 +10,9 @@ from kml_handler import KmlHandler
 from api_session import ApiSession
 import image_creator
 
+# Path where the data logger will write to
+logging_path = ''
+
 
 def get_project_list(self):
     """
@@ -55,6 +58,8 @@ class ProjectManager():
         self.kml_handler.file_path = (
             folder_path + os.sep + '{}.kml'.format(project_name)
         )
+        global logging_path
+        logging_path = self.projects_folder + os.sep + project_name + os.sep
 
         if os.path.exists(folder_path):
             print('project already exists')
@@ -171,14 +176,16 @@ class ProjectManager():
         footprint = self.get_footprint()
         query = self.api_session.query(footprint)
         return self.api_session.to_geo_df(query)
-    
+
     def save_catalog(self, contains=True):
         """
         Saves the Queried catalog to a csv file in the project directory
+        contains: if true will only save the links that fully contain
+            the footprint
         """
         footprint = self.get_footprint()
-        project_path = (self.projects_folder + os.sep + self.project_name + os.sep +
-                       self.project_name + '.csv')
+        project_path = (self.projects_folder + os.sep + self.project_name +
+                        os.sep + self.project_name + '.csv')
         self.api_session.query_to_dataframe(footprint, project_path, contains)
 
     def download_data(self, link):
@@ -299,7 +306,7 @@ class ProjectManager():
                      os.sep + self.project_name + '.kml')
         return self.kml_handler.create_bounding_box(projection_type, file_path)
 
-    def get_image_paths(self, image_type, cropped=True):
+    def get_image_paths(self, image_type, cropped=True, get_date=False):
         """
         Returns all the image paths and ask you what path youre looking for.
         """
@@ -316,9 +323,15 @@ class ProjectManager():
         if cropped:
             path = path + os.sep + 'cropped'
 
+        final_path = ''
         for files in os.listdir(path):
-            if image_type in files.lower():
-                return path + os.sep + files
+            if image_type in files.lower() and 'xml' not in files:
+                final_path = path + os.sep + files
+
+        if get_date and final_path != '':
+            return final_path, all_dates[int(selected)]
+        else:
+            return final_path
 
         print('No Imagery subjects found')
         return None
@@ -342,7 +355,7 @@ class ProjectManager():
         selection_path = classification_path + selection + os.sep
         if cropped:
             selection_path += 'cropped' + os.sep
-    
+
         all_results = os.listdir(selection_path)
 
         print('Select one of the images to view')
@@ -355,3 +368,47 @@ class ProjectManager():
 
         final_path = selection_path + selection
         return final_path
+
+    def get_possible_dates(self):
+        """
+        Prints and asks for selected date
+        """
+        classification_folder = self.get_classification_folder_path()
+        all_dates = os.listdir(classification_folder)
+
+        print('Select one of the following dates')
+
+        for num, date in enumerate(all_dates):
+            print('({}): {}'.format(num, date))
+
+        selected = input()
+        selection = all_dates[int(selected)]
+        return selection
+
+    def find_image(self, date, image_type, cropped=True):
+        """
+        Returns file path of an image given if it must be cropped and of a 
+        given image type
+        """
+        image_folder = self.get_images_folder_path() + date + os.sep
+        if cropped:
+            image_folder += 'cropped' + os.sep
+        all_files = os.listdir(image_folder)
+        for image in all_files:
+            if (image_type.lower() in image.lower() and not 'xml' in image):
+                return image_folder + image
+
+    def find_classification_path(self, date, classification_type, n_clusters,
+                                 cropped=True):
+        """
+        Returns file path of an image given if it must be cropped and of a 
+        given image type
+        """
+        class_folder = self.get_classification_folder_path() + date + os.sep
+        if cropped:
+            class_folder += 'cropped' + os.sep
+        all_files = os.listdir(class_folder)
+        for image in all_files:
+            if (classification_type.lower() in image.lower() and not 'xml' in image
+                    and str(n_clusters) in image.lower()):
+                return class_folder + image
