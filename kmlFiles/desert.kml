@@ -2,16 +2,6 @@
 <kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
 <Document>
 	<name>desert.kml</name>
-	<StyleMap id="m_ylw-pushpin">
-		<Pair>
-			<key>normal</key>
-			<styleUrl>#s_ylw-pushpin</styleUrl>
-		</Pair>
-		<Pair>
-			<key>highlight</key>
-			<styleUrl>#s_ylw-pushpin_hl</styleUrl>
-		</Pair>
-	</StyleMap>
 	<Style id="s_ylw-pushpin">
 		<IconStyle>
 			<scale>1.1</scale>
@@ -30,6 +20,16 @@
 			<hotSpot x="20" y="2" xunits="pixels" yunits="pixels"/>
 		</IconStyle>
 	</Style>
+	<StyleMap id="m_ylw-pushpin">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#s_ylw-pushpin</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#s_ylw-pushpin_hl</styleUrl>
+		</Pair>
+	</StyleMap>
 	<Placemark>
 		<name>desert</name>
 		<styleUrl>#m_ylw-pushpin</styleUrl>
@@ -38,7 +38,7 @@
 			<outerBoundaryIs>
 				<LinearRing>
 					<coordinates>
-						129.3642012306051,-26.15798231975083,0 129.334605146157,-26.1985644065454,0 129.4172556137011,-26.2180969092448,0 129.4202748525444,-26.17237918393475,0 129.3642012306051,-26.15798231975083,0 
+						-104.6143972203965,33.87231251331531,0 -104.6251307167101,33.84745403166501,0 -104.5984989626731,33.84785536273238,0 -104.5865054678863,33.87841653758993,0 -104.6143972203965,33.87231251331531,0 
 					</coordinates>
 				</LinearRing>
 			</outerBoundaryIs>

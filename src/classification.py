@@ -1,17 +1,17 @@
 """
 CLASSIFICATION FILE, USED TO ADD CLUSTERING TO IMAGES
 """
-
 import os
 from sklearn.cluster import KMeans, DBSCAN
 from sklearn.mixture import GaussianMixture
+import numpy as np
 import matplotlib.pyplot as plt
 import gdal
 from raster_data import RasterData
 from logger import Logger
 
 
-def plot_cost_function(project, image_type='allbands',
+def plot_cost_function(project, image_type='rgb',
                        cropped=True, normalized=True):
     """
     plots the cost function for different numbers of clusters
@@ -24,14 +24,18 @@ def plot_cost_function(project, image_type='allbands',
     if normalized:
         data.standard_normalize_array(inplace=True)
 
-    kval = range(2, 15)
+    kval = range(2, 5)
     costs = []
     for k in kval:
-        cost = KMeans(n_clusters=k,
-                      random_state=1).fit(data.flatten_array()).inertia_
-        costs.append(cost)
+        kmeans_model = KMeans(n_clusters=k, random_state=0)
+        prediction = kmeans_model.fit_predict(data.flatten_array())
+
+        results = list(np.unique(prediction,return_counts=True)[1])
+        list.sort(results)
+        costs.append(kmeans_model.inertia_)
+
         log.log(project.project_name, date, image_type, k, cropped, normalized,
-                'kmeans', cost)
+                'kmeans', kmeans_model.inertia_, str(results))
         log.push_information()
 
     plt.plot(kval, costs)
@@ -87,16 +91,20 @@ def kmeans_cluster(project, clusters, image_type='allbands',
     output_path = ''
     if normalized:
         data.standard_normalize_array(inplace=True)
-        data.gaussian_blur_array(2)
-        output_path = '{}_normalized_kmeans_{}.tiff'.format(clusters,
+        data.gaussian_blur_array(5)
+        output_path = '{}_normalized_blurred2_kmeans_{}.tiff'.format(clusters,
                                                             image_type)
     else:
         output_path = '{}_kmeans_{}.tiff'.format(clusters, image_type)
 
-    kmeans_model = KMeans(n_clusters=clusters)
+    kmeans_model = KMeans(n_clusters=clusters, n_init=80)
     prediction = kmeans_model.fit_predict(data.flatten_array())
+
+    results = list(np.unique(prediction,return_counts=True)[1])
+    list.sort(results)
     log.log(project.project_name, date, image_type, clusters, cropped,
-            normalized, 'kmeans', kmeans_model.inertia_)
+            normalized, 'kmeans', kmeans_model.inertia_, str(results))
+
     log.push_information()
     save_output_result(prediction, project, image_path, output_path, cropped)
 
@@ -111,7 +119,7 @@ def gmm_cluster(project, components, image_type='allbands',
     data = RasterData(image_path)
     log = Logger()
 
-    output_path = ''
+    jkkoutput_path = ''
     if normalized:
         data.standard_normalize_array(inplace=True)
         output_path = '{}_normalized_gmm_{}.tiff'.format(components,
@@ -119,16 +127,19 @@ def gmm_cluster(project, components, image_type='allbands',
     else:
         output_path = '{}_gmm_{}.tiff'.format(components, image_type)
 
-    gmm = GaussianMixture(n_components=components)
+    gmm = GaussianMixture(n_components=components, n_init=10)
     prediction = gmm.fit_predict(data.flatten_array())
     save_output_result(prediction, project, image_path, output_path, cropped)
+
+    results = list(np.unique(prediction,return_counts=True)[1])
+    list.sort(results)
 
     cost = {
             "AIC": gmm.aic(data.flatten_array()),
             "BIC": gmm.bic(data.flatten_array())
     }
     log.log(project.project_name, date, image_type, components, cropped,
-            normalized, 'gmm', cost)
+            normalized, 'gmm', cost, str(results))
     log.push_information()
 
 

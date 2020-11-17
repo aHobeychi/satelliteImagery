@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 THREEBANDS = ['rgb', 'agri', 'bathy', 'swi', 'geo']
 
 BRIGHTNESS = {
-    'rgb': 5,
+    'rgb': 1,
     'agri': 3,
     'geo': 2,
 }
@@ -38,15 +38,17 @@ def show_classification(project, cropped=True):
     filepath = project.get_classification_path(cropped)
     title = filepath.split(os.sep)[-1].split('.')[0]
     img = rasterio.open(filepath)
-    rasterio.plot.show(img, title=title)
+    rasterio.plot.show(img, title=title, cmap="magma")
 
 
+image_type = 'ndvi'
+num_clusters = 3
 grid_options = {
         # The format is as follows 1. image type, 2. Cropped
         'plot1': ['rgb', True],
         # plot, type, number of clusters
-        'plot2': ['kmeans', True, 4],
-        'plot3': ['gmm', True, 4]
+        'plot2': ['kmeans', image_type, True, num_clusters],
+        'plot3': ['gmm', image_type, True, num_clusters]
 }
 
 
@@ -70,7 +72,8 @@ def show_grid_results(project):
     ax1.set_title('{} Image'.format(grid_options['plot1'][0].upper()))
 
     ax2 = plt.subplot(222)
-    ax2.imshow(get_result_plot(project, date, *grid_options['plot2']))
+    ax2.imshow(get_result_plot(project, date, *grid_options['plot2']),
+               cmap='inferno')
     ax2.set_xticklabels([])
     ax2.set_yticklabels([])
     ax2.set_aspect('equal')
@@ -79,7 +82,8 @@ def show_grid_results(project):
                   grid_options['plot2'][0].upper(), grid_options['plot2'][-1]))
 
     ax3 = plt.subplot(224)
-    ax3.imshow(get_result_plot(project, date, *grid_options['plot3']))
+    ax3.imshow(get_result_plot(project, date, *grid_options['plot3']),
+               cmap='inferno')
     ax3.set_title(grid_options['plot3'][0])
     ax3.set_xticklabels([])
     ax3.set_yticklabels([])
@@ -89,16 +93,18 @@ def show_grid_results(project):
                   grid_options['plot3'][0].upper(), grid_options['plot3'][-1]))
 
     plt.tight_layout()
-    plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, hspace=None)
+    plt.subplots_adjust(left=None, bottom=None, right=None, top=None,
+                        wspace=None, hspace=None)
 
     plt.show()
 
 
-def get_result_plot(project, date, plot_type, cropped, n_clusters):
+def get_result_plot(project, date, algorithm, training_set, cropped,
+                    n_clusters):
     """
     Returns axes of a plot, for a given clustering result
     """
-    path = project.find_classification_path(date, plot_type,
+    path = project.find_classification_path(date, algorithm, training_set,
                                             n_clusters, cropped)
     image = RasterData(path)
     return image.array
@@ -120,9 +126,9 @@ def __show_three_bands(file_path, image_type):
 
 def __normalize_array(arr, img_type):
     """Normalized the image array to put them within a 0-1 range"""
-    arr_min = np.min(arr).astype('float32')
-    arr_max = np.max(arr).astype('float32')
-    norm = (BRIGHTNESS[img_type]*(arr.astype('float32')
+    arr_min = np.min(arr)
+    arr_max = np.max(arr)
+    norm = (BRIGHTNESS[img_type]*(arr.copy()
             - arr_min)/(arr_max + arr_min))
 
     return norm.clip(min=0)

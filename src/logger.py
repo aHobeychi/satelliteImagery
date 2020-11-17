@@ -9,13 +9,13 @@ import project_manager
 class Logger():
     """Class to log the results and useful information"""
     def __init__(self):
-        self.output_path = project_manager.logging_path + 'log.csv'
+        self.output_path = project_manager.logging_path + 'result.csv'
         self.packet = self.Packet()
 
         if not Path(self.output_path).is_file():
             with open(self.output_path, 'a') as log_file:
                 log_file.write('project,date,image_type,clusters,cropped' +
-                               ',normalized,algorithm,cost\n')
+                               ',normalized,algorithm,cost,results\n')
 
     def log(self, *information):
         """

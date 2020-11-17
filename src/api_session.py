@@ -12,7 +12,7 @@ query = {
     'platform':     'Sentinel-2',
     'processing':   'Level-2A',
     'begin':        '20191001',
-    'end':          '20201026',
+    'end':          '20201116',
 }
 
 
@@ -48,7 +48,7 @@ class ApiSession():
 
     def query(self, footprint):
         """
-        Queries the SentinelAPI and returns a geopanda containing data
+        Queries the SentinelAPI and returns a geojson containing data
         candidates.
         """
         return self.api.query(footprint, date=(query['begin'], query['end']),
@@ -70,22 +70,22 @@ class ApiSession():
 
     def query_to_dataframe(self, footprint, output_path, contains=True):
         """
-        Saves the queried geopandas to a csv file so that it could be 
+        Saves the queried geopandas to a csv file so that it could be
         used in the future.
-        contains: if true will only save the links that fully contain the 
+        contains: if true will only save the links that fully contain the
             footprint
         """
         catalog = self.query(footprint)
         catalog = self.to_geo_df(catalog)
         desired_columns = [
             'summary', 'vegetationpercentage', 'notvegetatedpercentage',
-            'waterpercentage','unclassifiedpercentage', 'snowicepercentage',
-            'cloudcoverpercentage', 'geometry'
+            'waterpercentage', 'unclassifiedpercentage', 'snowicepercentage',
+            'cloudcoverpercentage', 'geometry', 'size'
         ]
         filtered_catalog = catalog[desired_columns]
-        if (contains):
-            contains = [footprint.within(geometry) for 
-                                    geometry in catalog['geometry']]
+        if contains:
+            contains = [footprint.within(geometry) for
+                        geometry in catalog['geometry']]
             filtered_catalog = filtered_catalog[contains]
 
         output = filtered_catalog.to_csv()

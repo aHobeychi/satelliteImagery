@@ -19,7 +19,8 @@ def create_batch_images(index, project):
     """
     output = index[1]
     create_rgb(index, project, output)
-    create_ndvi(index, project, output)
+    # create_ndvi(index, project, output)
+    create_ndwi(index, project, output)
     create_ndbi(index, project, output)
     crop_images(index, project, output)
 
@@ -35,13 +36,14 @@ def create_images(project):
     create_rgb(info, project, output)
     create_ndvi(info, project, output)
     create_ndbi(info, project, output)
+    create_ndwi(info, project, output)
     # create_all_bands(info, project, output)
-    create_agri(info, project, output)
-    create_bathy(info, project, output)
-    create_geo(info, project, output)
-    create_swi(info, project, output)
+    # create_agri(info, project, output)
+    # create_bathy(info, project, output)
+    # create_geo(info, project, output)
+    # create_swi(info, project, output)
 
-    crop_images(info, project, output)
+    # crop_images(info, project, output)
 
 
 def crop_images(info, project, output):
@@ -100,6 +102,38 @@ def create_ndbi(info, project, output):
                                height=nir_reader.height,
                                count=1, crs=nir_reader.crs,
                                transform=nir_reader.transform,
+                               dtype='float64')
+    ndbi_image.write(ndbi, 1)
+    ndbi_image.close()
+
+
+def create_ndwi(info, project, output):
+    """
+    The NDWI is used to monitor changes related to water content in water
+    bodies. As water bodies strongly absorb light in visible to infrared
+    electromagnetic spectrum, NDWI uses green and near infrared bands to
+    highlight water bodies. It is sensitive to built-up land and can result
+    in over-estimation of water bodies. The index was proposed by McFeeters,
+    1996.
+    """
+    filepath = path.join(output, '{}_{}'.format(
+        project.project_name, 'NDWI.tiff'))
+
+    # print(info[0][1])
+    r20 = info[0][1]
+
+    green_reader = rasterio.open(r20['B03'], driver='JP2OpenJPEG')
+    vnir_reader = rasterio.open(r20['B8A'], driver='JP2OpenJPEG')
+
+    green = green_reader.read(1).astype('float64')
+    vnir = vnir_reader.read(1).astype('float64')
+
+    ndbi = np.where((green+vnir) == 0, 0, (green-vnir)/(green+vnir))
+    ndbi_image = rasterio.open(filepath, 'w', driver='Gtiff',
+                               width=vnir_reader.width,
+                               height=vnir_reader.height,
+                               count=1, crs=vnir_reader.crs,
+                               transform=vnir_reader.transform,
                                dtype='float64')
     ndbi_image.write(ndbi, 1)
     ndbi_image.close()

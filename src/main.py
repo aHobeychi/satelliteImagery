@@ -57,7 +57,7 @@ def main():
         show_image(project, 'rgb', cropped=False)
 
     # CLASSIFICATION
-    clusters = 4
+    clusters = 7
     cropped = True
     image_type = 'rgb'
     # 5. classify the image
@@ -65,16 +65,16 @@ def main():
     # answ = 'y'
     if answ == 'y':
         kmeans_cluster(project, clusters, image_type, cropped)
-        gmm_cluster(project, clusters, image_type, cropped)
+        # gmm_cluster(project, clusters, image_type, cropped)
         # dbscan_cluster(project, 5, 100, image_type, cropped)
-        plot_cost_function(project, 'ndvi')
+        # plot_cost_function(project, image_type)
 
     # 6. show classified image
     answ = input('Do you want to show the classified images (y/n)?: ')
     if answ == 'y':
         # convert_to_png(project, 'ndvi', False, True, clusters)
         show_classification(project, cropped)
-        show_grid_results(project)
+        # show_grid_results(project)
 
 
 if __name__ == "__main__":

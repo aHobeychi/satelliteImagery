@@ -54,7 +54,7 @@ class KmlHandler():
         coord_start = data.find('<coordinates>')
         coord_end = data.find('</coordinates>')
         coords = data[coord_start:coord_end].replace(
-            '<coordinates>', '').strip().split(' ')
+                '<coordinates>', '').strip().split(' ')
         coordinates = []
         for points in coords:
             point = []
@@ -72,6 +72,6 @@ class KmlHandler():
 
         parsed_kml = self.parse_kml(self.file_path)
         list_of_coordinates = (geometry_handler.remove_third_dimension
-                               (parsed_kml['coordinates']))
+                (parsed_kml['coordinates']))
         footprint = geometry_handler.create_geometry(list_of_coordinates)
         return footprint

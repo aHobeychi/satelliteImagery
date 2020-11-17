@@ -6,6 +6,7 @@ unzipping the data and keeping track of the image paths
 import os
 from shutil import copy, move
 from zipfile import ZipFile
+import pandas as pd
 from kml_handler import KmlHandler
 from api_session import ApiSession
 import image_creator
@@ -188,6 +189,21 @@ class ProjectManager():
                         os.sep + self.project_name + '.csv')
         self.api_session.query_to_dataframe(footprint, project_path, contains)
 
+    def get_catalog_path(self):
+        """
+        Returns the location of the query catalog
+        """
+        return (self.projects_folder + os.sep + self.project_name + os.sep +
+                os.sep + self.project_name + '.csv')
+
+    def get_dataframe(self):
+        """
+        Returns the dataframe from the <project>.csv from the project folder.
+        """
+        csv_path = (self.projects_folder + os.sep + self.project_name + os.sep
+                    + self.project_name + '.csv')
+        return pd.read_csv(csv_path, index_col=0)
+
     def download_data(self, link):
         """
         downloads the data from the specific link.
@@ -262,6 +278,7 @@ class ProjectManager():
         data_path = self.get_download_path()
         image_path = self.get_images_folder_path()
         all_dates = os.listdir(data_path)
+        all_dates.sort()
         print('Select one of the dates to create images:')
 
         for num, day in enumerate(all_dates):
@@ -312,6 +329,7 @@ class ProjectManager():
         """
         image_path = self.get_images_folder_path()
         all_dates = os.listdir(image_path)
+        all_dates.sort()
         print('Select one of the dates to view the Images:')
 
         for num, date in enumerate(all_dates):
@@ -343,7 +361,7 @@ class ProjectManager():
         """
         classification_path = self.get_classification_folder_path()
         all_dates = os.listdir(classification_path)
-
+        all_dates.sort()
         print('Select one of the dates to view the classification:')
 
         for num, date in enumerate(all_dates):
@@ -375,6 +393,7 @@ class ProjectManager():
         """
         classification_folder = self.get_classification_folder_path()
         all_dates = os.listdir(classification_folder)
+        all_dates.sort()
 
         print('Select one of the following dates')
 
@@ -387,7 +406,7 @@ class ProjectManager():
 
     def find_image(self, date, image_type, cropped=True):
         """
-        Returns file path of an image given if it must be cropped and of a 
+        Returns file path of an image given if it must be cropped and of a
         given image type
         """
         image_folder = self.get_images_folder_path() + date + os.sep
@@ -395,20 +414,29 @@ class ProjectManager():
             image_folder += 'cropped' + os.sep
         all_files = os.listdir(image_folder)
         for image in all_files:
-            if (image_type.lower() in image.lower() and not 'xml' in image):
+            if (image_type.lower() in image.lower() and 'xml' not in image):
                 return image_folder + image
 
-    def find_classification_path(self, date, classification_type, n_clusters,
-                                 cropped=True):
+        return None
+
+    def find_classification_path(self, date, algorithm, training_set,
+                                 n_clusters, cropped=True):
         """
-        Returns file path of an image given if it must be cropped and of a 
+        Returns file path of an image given if it must be cropped and of a
         given image type
         """
+        print(date)
         class_folder = self.get_classification_folder_path() + date + os.sep
         if cropped:
             class_folder += 'cropped' + os.sep
         all_files = os.listdir(class_folder)
+        all_files.sort()
+        print(all_files)
         for image in all_files:
-            if (classification_type.lower() in image.lower() and not 'xml' in image
-                    and str(n_clusters) in image.lower()):
+            if (algorithm.lower() in image.lower() and 'xml' not in image
+                    and str(n_clusters) in image.lower()
+                    and training_set.lower() in image.lower()):
                 return class_folder + image
+
+        print('No file found!')
+        return None

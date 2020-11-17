@@ -11,19 +11,17 @@ class RasterData():
     """RasterData class """
     def __init__(self, image_path):
         self.org_image_path = image_path
-        self.raster_data = gdal.Open(image_path)
-        self.n_bands = self.raster_data.RasterCount
         self.array = self.get_array_from_raster()
         self.height = self.array.shape[0]
         self.width = self.array.shape[1]
         """Shape tuple of the array data"""
-        self.shape = (self.height, self.width, self.n_bands)
+        self.shape = self.array.shape
 
     def reset_raster_data(self):
         """
         Reinitializes the raster_data to the original till file
         """
-        self.raster_data = gdal.Open(self.org_image_path)
+        self.array = self.get_array_from_raster()
 
     def get_current_shape(self):
         """
@@ -32,20 +30,21 @@ class RasterData():
         """
         return self.array.shape
 
-    def get_array_from_raster(self, dtype=np.float32):
+    def get_array_from_raster(self, dtype=np.float64):
         """
         Return Numpy array from the raster data
         """
-        data = np.empty((self.raster_data.RasterYSize,
-                         self.raster_data.RasterXSize, self.n_bands))
+        raster_data = gdal.Open(self.org_image_path)
+        data = np.empty((raster_data.RasterYSize,
+                         raster_data.RasterXSize, raster_data.RasterCount))
 
-        for i in range(1, self.n_bands+1):
-            band = self.raster_data.GetRasterBand(i).ReadAsArray()
+        for i in range(1, raster_data.RasterCount+1):
+            band = raster_data.GetRasterBand(i).ReadAsArray()
             data[:, :, i-1] = band
         if dtype == np.float32:
             return np.float32(data)
 
-        return np.float64(data)
+        return data
 
     def get_array(self, copy=False):
         """
