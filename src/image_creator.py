@@ -20,8 +20,8 @@ def create_batch_images(index, project):
     output = index[1]
     create_rgb(index, project, output)
     # create_ndvi(index, project, output)
-    create_ndwi(index, project, output)
-    create_ndbi(index, project, output)
+    # create_ndwi(index, project, output)
+    # create_ndbi(index, project, output)
     crop_images(index, project, output)
 
 
@@ -34,9 +34,9 @@ def create_images(project):
 
     output = info[1]
     create_rgb(info, project, output)
-    create_ndvi(info, project, output)
-    create_ndbi(info, project, output)
-    create_ndwi(info, project, output)
+    # create_ndvi(info, project, output)
+    # create_ndbi(info, project, output)
+    # create_ndwi(info, project, output)
     # create_all_bands(info, project, output)
     # create_agri(info, project, output)
     # create_bathy(info, project, output)

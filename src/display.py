@@ -128,7 +128,6 @@ def __normalize_array(arr, img_type):
     """Normalized the image array to put them within a 0-1 range"""
     arr_min = np.min(arr)
     arr_max = np.max(arr)
-    norm = (BRIGHTNESS[img_type]*(arr.copy()
-            - arr_min)/(arr_max + arr_min))
+    norm = (BRIGHTNESS[img_type]*(arr - arr_min)/(arr_max + arr_min))
 
-    return norm.clip(min=0)
+    return norm

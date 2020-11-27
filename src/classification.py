@@ -100,7 +100,7 @@ def kmeans_cluster(project, clusters, image_type='allbands',
     kmeans_model = KMeans(n_clusters=clusters, n_init=80)
     prediction = kmeans_model.fit_predict(data.flatten_array())
 
-    results = list(np.unique(prediction,return_counts=True)[1])
+    results = list(np.unique(prediction, return_counts=True)[1])
     list.sort(results)
     log.log(project.project_name, date, image_type, clusters, cropped,
             normalized, 'kmeans', kmeans_model.inertia_, str(results))

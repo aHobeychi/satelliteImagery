@@ -97,9 +97,9 @@ class RasterData():
         if len(self.array.shape) != 3:
             return self.array
 
-        flat_data = np.empty((self.height*self.width, self.n_bands))
+        flat_data = np.empty((self.height*self.width, self.shape[-1]))
         data = self.array
-        for i in range(0, self.n_bands):
+        for i in range(0, self.shape[-1]):
             flat_band = data[:, :, i].reshape(self.width*self.height)
             flat_data[:, i] = flat_band
 

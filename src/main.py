@@ -38,7 +38,7 @@ def main():
 
     # 1. create project
     # projectName = 'kilimanjaro'
-    project_name = 'montreal'
+    project_name = 'sanfrancisco'
     project = ProjectManager(project_name)
 
     # show_grid_results(project)
