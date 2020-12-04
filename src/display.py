@@ -1,5 +1,5 @@
 """
-DISPLAY SATELLITE IMAGERY AND CLASSIFICATION RESULTS
+DISPLAY SATELLITE IMAGERY AND CLUSTERING RESULTS
 """
 
 import os
@@ -31,11 +31,11 @@ def show_image(project, image_type, cropped=True):
     rasterio.plot.show(img, title=image_type, map='RdYlGn', vmin=-1, vmax=1)
 
 
-def show_classification(project, cropped=True):
+def show_clustering(project, cropped=True):
     """
-    Plots Classification Result
+    Plots clustering Result
     """
-    filepath = project.get_classification_path(cropped)
+    filepath = project.get_clustering_path(cropped)
     title = filepath.split(os.sep)[-1].split('.')[0]
     img = rasterio.open(filepath)
     rasterio.plot.show(img, title=title, cmap="magma")
@@ -55,7 +55,7 @@ grid_options = {
 def show_grid_results(project):
     """
     Plots Mutipleplots side by side Typically (1x3), first being rgb, second
-    being classification result 1 and third being classification result 2
+    being clustering result 1 and third being clustering result 2
     """
     date = project.get_possible_dates()
     image_path = project.find_image(date, 'rgb')
@@ -104,8 +104,8 @@ def get_result_plot(project, date, algorithm, training_set, cropped,
     """
     Returns axes of a plot, for a given clustering result
     """
-    path = project.find_classification_path(date, algorithm, training_set,
-                                            n_clusters, cropped)
+    path = project.find_clustering_path(date, algorithm, training_set,
+                                        n_clusters, cropped)
     image = RasterData(path)
     return image.array
 
@@ -131,3 +131,16 @@ def __normalize_array(arr, img_type):
     norm = (BRIGHTNESS[img_type]*(arr - arr_min)/(arr_max + arr_min))
 
     return norm
+
+
+def tci_to_array(image):
+    """
+    Open Tci image, converts to numpy and returns it.
+    """
+    img = rasterio.open(image)
+    final_image = np.zeros([*img.shape, 3]).astype(np.uint16)
+    final_image[:, :, 0] = img.read(1)
+    final_image[:, :, 1] = img.read(2)
+    final_image[:, :, 2] = img.read(3)
+
+    return final_image

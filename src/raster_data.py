@@ -88,11 +88,9 @@ class RasterData():
 
         return None
 
-    def flatten_array(self, inplace=False, returnable=True):
+    def flatten_array(self):
         """
         Returns a flattened data array
-        inplace: if true will change the objects data
-                 if false will copy and return a flattened array
         """
         if len(self.array.shape) != 3:
             return self.array
@@ -103,13 +101,7 @@ class RasterData():
             flat_band = data[:, :, i].reshape(self.width*self.height)
             flat_data[:, i] = flat_band
 
-        if inplace:
-            self.array = flat_data
-
-        if returnable:
-            return flat_data
-
-        return None
+        return flat_data
 
     def reform_array(self, inplace=False, returnable=True):
         """
@@ -121,9 +113,9 @@ class RasterData():
         if len(self.array.shape) == 3:
             return self.array
 
-        org_data = np.empty((self.height, self.width, self.n_bands))
+        org_data = np.empty((*self.shape))
         data = self.array
-        for i in range(0, self.n_bands):
+        for i in range(0, self.shape[2]):
             tmp = data[:, i].reshape(self.height, self.width)
             org_data[:, :, i] = tmp
 

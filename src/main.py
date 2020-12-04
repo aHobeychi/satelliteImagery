@@ -3,9 +3,9 @@ Main file, Where the Program takes shape.
 """
 from project_manager import ProjectManager
 import image_creator
-from display import show_image, show_classification, show_grid_results
-from classification import kmeans_cluster, plot_cost_function
-from classification import dbscan_cluster, gmm_cluster
+from display import show_image, show_clustering, show_grid_results
+from clustering import kmeans_cluster, plot_cost_function
+from clustering import dbscan_cluster, gmm_cluster
 
 
 def download_sample(project):
@@ -56,7 +56,7 @@ def main():
     if answ == 'y':
         show_image(project, 'rgb', cropped=False)
 
-    # CLASSIFICATION
+    # clustering
     clusters = 7
     cropped = True
     image_type = 'rgb'
@@ -73,7 +73,7 @@ def main():
     answ = input('Do you want to show the classified images (y/n)?: ')
     if answ == 'y':
         # convert_to_png(project, 'ndvi', False, True, clusters)
-        show_classification(project, cropped)
+        show_clustering(project, cropped)
         # show_grid_results(project)
 
 

@@ -11,7 +11,6 @@ from kml_handler import KmlHandler
 from api_session import ApiSession
 import image_creator
 
-# Path where the data logger will write to
 logging_path = ''
 
 
@@ -55,7 +54,7 @@ class ProjectManager():
         folder_path = self.projects_folder + os.sep + project_name
         data_path = folder_path + os.sep + 'data'
         images_path = folder_path + os.sep + 'images'
-        classification_path = folder_path + os.sep + 'classification'
+        clustering_path = folder_path + os.sep + 'clustering'
         self.kml_handler.file_path = (
             folder_path + os.sep + '{}.kml'.format(project_name)
         )
@@ -68,7 +67,7 @@ class ProjectManager():
             os.mkdir(folder_path)
             os.mkdir(data_path)
             os.mkdir(images_path)
-            os.mkdir(classification_path)
+            os.mkdir(clustering_path)
             print('project created succesfully')
 
         self.add_kml()
@@ -123,13 +122,13 @@ class ProjectManager():
         return (self.projects_folder + os.sep +
                 self.project_name + os.sep + 'images' + os.sep)
 
-    def get_classification_folder_path(self):
+    def get_clustering_folder_path(self):
         """
-        Returns the location of the classification folder for
+        Returns the location of the clustering folder for
         the given project.
         """
         return (self.projects_folder + os.sep +
-                self.project_name + os.sep + 'classification' + os.sep)
+                self.project_name + os.sep + 'clustering' + os.sep)
 
     def unzip_download(self):
         """
@@ -213,7 +212,7 @@ class ProjectManager():
 
     def create_imagery_folder(self, selected_file):
         """
-        Creates the image and classification folder for the selected data
+        Creates the image and clustering folder for the selected data
         of the data
         """
         image_path = self.get_images_folder_path()
@@ -221,9 +220,9 @@ class ProjectManager():
         if not os.path.exists(image_path + selected_file):
             os.mkdir(image_path + selected_file)
             os.mkdir(image_path + selected_file + os.sep + 'cropped')
-            os.mkdir(self.get_classification_folder_path() + selected_file
+            os.mkdir(self.get_clustering_folder_path() + selected_file
                      + os. sep)
-            os.mkdir(self.get_classification_folder_path() + selected_file
+            os.mkdir(self.get_clustering_folder_path() + selected_file
                      + os. sep + 'cropped')
 
         if not os.path.exists(image_path + selected_file +
@@ -354,15 +353,15 @@ class ProjectManager():
         print('No Imagery subjects found')
         return None
 
-    def get_classification_path(self, cropped=True):
+    def get_clustering_path(self, cropped=True):
         """
         Return the classfication result path after asking which one
         your interested in.
         """
-        classification_path = self.get_classification_folder_path()
-        all_dates = os.listdir(classification_path)
+        clustering_path = self.get_clustering_folder_path()
+        all_dates = os.listdir(clustering_path)
         all_dates.sort()
-        print('Select one of the dates to view the classification:')
+        print('Select one of the dates to view the clustering:')
 
         for num, date in enumerate(all_dates):
             print('({}): {}'.format(num, date))
@@ -370,7 +369,7 @@ class ProjectManager():
         selected = input()
         selection = all_dates[int(selected)]
 
-        selection_path = classification_path + selection + os.sep
+        selection_path = clustering_path + selection + os.sep
         if cropped:
             selection_path += 'cropped' + os.sep
 
@@ -391,8 +390,8 @@ class ProjectManager():
         """
         Prints and asks for selected date
         """
-        classification_folder = self.get_classification_folder_path()
-        all_dates = os.listdir(classification_folder)
+        clustering_folder = self.get_clustering_folder_path()
+        all_dates = os.listdir(clustering_folder)
         all_dates.sort()
 
         print('Select one of the following dates')
@@ -419,14 +418,14 @@ class ProjectManager():
 
         return None
 
-    def find_classification_path(self, date, algorithm, training_set,
-                                 n_clusters, cropped=True):
+    def find_clustering_path(self, date, algorithm, training_set,
+                             n_clusters, cropped=True):
         """
         Returns file path of an image given if it must be cropped and of a
         given image type
         """
         print(date)
-        class_folder = self.get_classification_folder_path() + date + os.sep
+        class_folder = self.get_clustering_folder_path() + date + os.sep
         if cropped:
             class_folder += 'cropped' + os.sep
         all_files = os.listdir(class_folder)

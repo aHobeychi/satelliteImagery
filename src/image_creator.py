@@ -19,10 +19,10 @@ def create_batch_images(index, project):
     """
     output = index[1]
     create_rgb(index, project, output)
-    # create_ndvi(index, project, output)
-    # create_ndwi(index, project, output)
-    # create_ndbi(index, project, output)
-    crop_images(index, project, output)
+    create_ndvi(index, project, output)
+    create_ndwi(index, project, output)
+    create_ndbi(index, project, output)
+    # crop_images(index, project, output)
 
 
 def create_images(project):
@@ -34,16 +34,11 @@ def create_images(project):
 
     output = info[1]
     create_rgb(info, project, output)
-    # create_ndvi(info, project, output)
-    # create_ndbi(info, project, output)
-    # create_ndwi(info, project, output)
-    # create_all_bands(info, project, output)
-    # create_agri(info, project, output)
-    # create_bathy(info, project, output)
-    # create_geo(info, project, output)
-    # create_swi(info, project, output)
+    create_ndvi(info, project, output)
+    create_ndbi(info, project, output)
+    create_ndwi(info, project, output)
 
-    # crop_images(info, project, output)
+    crop_images(info, project, output)
 
 
 def crop_images(info, project, output):
@@ -325,12 +320,12 @@ def __convert_three_bands(file_path, image_type):
     plt.savefig(output, dpi=2000, bbox_inches='tight', pad_inches=0)
 
 
-def convert_to_png(project, image_type, cropped=True, classification=False,
+def convert_to_png(project, image_type, cropped=True, clustering=False,
                    clusters=0):
     """
     Converts tiff image to png and saves it
     """
-    if not classification:
+    if not clustering:
         filepath = project.getImagePath(image_type, cropped)
 
         if path.exists(filepath.replace('tiff', 'png')):
@@ -347,9 +342,9 @@ def convert_to_png(project, image_type, cropped=True, classification=False,
         plt.axis('off')
         plt.savefig(output, dpi=1000, bbox_inches='tight', pad_inches=0)
 
-    if classification:
-        filepath = project.get_classification_path(image_type,
-                                                   clusters, cropped)
+    if clustering:
+        filepath = project.get_clustering_path(image_type,
+                                               clusters, cropped)
         output = filepath.replace('tiff', 'png')
         img = rasterio.open(filepath)
 
