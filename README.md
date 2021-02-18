@@ -2,7 +2,7 @@
 Project that uses Sentinel-2 data and demonstrates three machine learning techniques
 to make conclusions about the areas captured by the imagery.
 
-See Jupyter notebooks for Examples.
+See Jupyter notebooks for Examples or Results.pdf for final conclusions.
 <br/>
 
 ___
